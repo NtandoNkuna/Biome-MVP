@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Listings | Biome</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/property-listings.css">
+    <link rel="stylesheet" href="css/back-link.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- ============================================================
+         BACK-LINK VIEWPORT ANCHOR — TRIPLE DEFENCE
+         1. Re-parent to <html>  (escapes transformed ancestors)
+         2. Popover / top-layer  (escapes the DOM tree entirely)
+         3. Manual scroll-track  (last-resort compensation)
+         ============================================================ -->
+    <script>
+    (function () {
+        'use strict';
+
+        var LINK_SELECTOR = '.back-link';
+
+        /* ---------- 1. Re-parent to <html> ---------- */
+        function relocate() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (link && link.parentElement !== document.documentElement) {
+                document.documentElement.appendChild(link);
+                console.log('[BackLink] Re-parented to <html>.');
+            }
+            return link;
+        }
+
+        /* ---------- 2. Top-layer via popover ---------- */
+        function tryTopLayer() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (!link) return false;
+            if (typeof link.showPopover !== 'function') return false;
+
+            if (!link.hasAttribute('popover')) {
+                link.setAttribute('popover', 'manual');
+            }
+            try {
+                link.showPopover();   // idempotent enough for our purpose
+                console.log('[BackLink] Promoted to top layer.');
+                return true;
+            } catch (e) {
+                console.warn('[BackLink] showPopover() failed:', e.message);
+                return false;
+            }
+        }
+
+        /* ---------- 3. Manual scroll compensation ----------
+           Only kicks in if the top layer isn't available AND
+           something above the link is still translating it.
+           We compensate by writing `top` on every scroll. */
+        function installScrollFallback() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (!link) return;
+
+            // Skip if the top layer took over — it doesn't need help.
+            if (link.hasAttribute('popover') && link.matches(':popover-open')) return;
+
+            var baseTop = 24;
+            var mq = window.matchMedia('(max-width: 768px)');
+            function updateBase() {
+                if (window.matchMedia('(max-width: 480px)').matches) baseTop = 12;
+                else if (mq.matches) baseTop = 16;
+                else baseTop = 24;
+            }
+
+            function sync() {
+                // If the link is inside a scroll-shifted body (classic
+                // smooth-scroll pattern), body's top is negative scrollY.
+                // We counter-shift the link so it visually stays put.
+                var bodyTop = parseFloat(getComputedStyle(document.body).top) || 0;
+                var htmlTop = parseFloat(getComputedStyle(document.documentElement).top) || 0;
+                var compensation = -(bodyTop + htmlTop);
+                link.style.setProperty('top', (baseTop + compensation) + 'px', 'important');
+            }
+
+            updateBase();
+            sync();
+
+            window.addEventListener('scroll', sync, { passive: true });
+            window.addEventListener('resize', function () { updateBase(); sync(); });
+            mq.addEventListener('change', function () { updateBase(); sync(); });
+            window.addEventListener('load', sync);
+
+            console.log('[BackLink] Scroll fallback installed.');
+        }
+
+        /* ---------- Boot sequence ---------- */
+        function boot() {
+            relocate();
+
+            var promoted = tryTopLayer();
+            if (!promoted) {
+                installScrollFallback();
+            }
+
+            // Retry re-parent a few times in case other scripts move it.
+            setTimeout(relocate, 300);
+            setTimeout(relocate, 1200);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+
+        window.addEventListener('load', boot);
+
+        // Watch for future DOM moves that would re-nest the link.
+        if (window.MutationObserver) {
+            document.addEventListener('DOMContentLoaded', function () {
+                var mo = new MutationObserver(function () {
+                    var link = document.querySelector(LINK_SELECTOR);
+                    if (link && link.parentElement !== document.documentElement) {
+                        document.documentElement.appendChild(link);
+                    }
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            });
+        }
+    })();
+    </script>
+</head>
+<body>
+
+    <!-- NAVBAR (hidden — kept in DOM so navbar.js does not crash) -->
+    <div id="navbarContainer" style="display: none;"></div>
+
+    <!-- PAGE HEADER -->
+    <section class="pl-page-header">
+        <h1>Find your next home</h1>
+        <p class="pl-page-subtitle">Browse verified listings across South Africa — updated daily.</p>
+    </section>
+
+    <!-- Back to previous page.
+         `popover="manual"` is a hint — the script will set it
+         automatically if it isn't there, and fall back to a
+         scroll-compensation strategy if the browser doesn't
+         support the popover API. -->
+    <a href="index.html" class="back-link" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
+
+    <!-- FILTERS CONTAINER -->
+    <section class="filters-container" id="filtersContainer">
+        <div class="top-row">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" name="search"
+                       placeholder="Search spaces, cities, or suburbs..." autocomplete="off">
+            </div>
+            <div class="view-buttons">
+                <button id="filterToggleBtn" type="button" aria-label="Toggle filters" aria-expanded="true">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="categories" id="categoryButtons"></div>
+
+        <hr>
+
+        <div id="extendedFilters" class="filter-panel">
+            <div class="filter-box">
+                <div class="filter-header">
+                    <h3>Filters</h3>
+                    <button id="closeFiltersBtn" type="button" aria-label="Close filters">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="filters-grid" id="filtersGrid">
+                    <div class="filter-group">
+                        <label for="minPrice">Minimum Price (ZAR)</label>
+                        <input type="number" id="minPrice" name="minPrice" placeholder="0" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label for="maxPrice">Maximum Price (ZAR)</label>
+                        <input type="number" id="maxPrice" name="maxPrice" placeholder="Any" min="0" step="1000">
+                    </div>
+                    <div class="filter-group">
+                        <label for="bedroomsFilter">Bedrooms</label>
+                        <select id="bedroomsFilter" name="bedrooms">
+                            <option value="">Any</option>
+                            <option value="1">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                            <option value="5">5+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="bathroomsFilter">Bathrooms</label>
+                        <select id="bathroomsFilter" name="bathrooms">
+                            <option value="">Any</option>
+                            <option value="1">1+</option>
+                            <option value="2">2+</option>
+                            <option value="3">3+</option>
+                            <option value="4">4+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="provinceFilter">Province</label>
+                        <input type="text" id="provinceFilter" name="province" placeholder="e.g. Gauteng">
+                    </div>
+                    <div class="filter-group">
+                        <label for="cityFilter">City</label>
+                        <input type="text" id="cityFilter" name="city" placeholder="e.g. Johannesburg">
+                    </div>
+                    <div class="filter-group">
+                        <label for="suburbFilter">Suburb</label>
+                        <input type="text" id="suburbFilter" name="suburb" placeholder="e.g. Sandton">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button id="applyFiltersBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-filter"></i> Apply Filters
+                    </button>
+                    <button id="resetFiltersBtn" class="btn btn-secondary">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS SUMMARY -->
+    <section class="results-summary" id="resultsSummary">
+        <p id="resultsCount">Loading listings...</p>
+        <div class="filter-group sort-group">
+            <label for="sortBy">Sort By</label>
+            <select id="sortBy" name="sortBy">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- LISTINGS GRID -->
+    <section class="listings-section">
+        <div class="listings-grid" id="listingsGrid"></div>
+
+        <div id="loadingState" class="loading-state" style="display:none;">
+            <div class="spinner"></div>
+            <p>Searching properties...</p>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">🔍</div>
+            <h3>No properties found</h3>
+            <p>Try adjusting your filters or search another location.</p>
+            <button id="emptyResetBtn" class="btn btn-secondary empty-reset-btn">
+                <i class="fa-solid fa-rotate-left"></i> Reset Filters
+            </button>
+        </div>
+
+        <div id="errorState" class="error-state" style="display:none;">
+            <div class="error-icon">⚠️</div>
+            <h3>Unable to load listings</h3>
+            <p>Please try again later or refresh the page.</p>
+            <button class="btn btn-secondary" onclick="location.reload()">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Page
+            </button>
+        </div>
+    </section>
+
+    <!-- PAGINATION -->
+    <section class="pagination" id="pagination" style="display:none;">
+        <button id="prevPageBtn" class="btn btn-secondary" disabled>
+            <i class="fa-solid fa-chevron-left"></i> Previous
+        </button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPageBtn" class="btn btn-secondary">
+            Next <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </section>
+
+    <!-- SCRIPTS -->
+    <script src="js/core/supabase.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/ui.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/storage.js"></script>
+
+    <script src="js/services/listingService.js"></script>
+    <script src="js/services/mediaService.js"></script>
+    <script src="js/services/profileService.js"></script>
+    <script src="js/services/propertyService.js"></script>
+
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/propertyCard.js"></script>
+    <script src="js/components/toast.js"></script>
+
+    <script src="js/pages/property-listings.js"></script>
+</body>
+</html> 

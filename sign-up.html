@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Biome Account</title>
+
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/back-link.css">
+
+    <!-- Google Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <!-- Supabase -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Core -->
+    <script defer src="js/core/supabase.js"></script>
+    <script defer src="js/core/utils.js"></script>
+    <script defer src="js/core/ui.js"></script>
+    <script defer src="js/core/auth.js"></script>
+
+    <!-- Page -->
+    <script defer src="js/pages/sign-up.js"></script>
+</head>
+<body>
+
+    <!-- Back to previous page -->
+    <a href="index.html" class="back-link" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
+
+    <div class="page-wrapper">
+
+        <main class="main-content">
+            <div class="card-content">
+
+                <!-- LOGO & HEADER -->
+                <div class="logo">
+                    <div class="logo-icon">
+                        <span class="material-icons">home_work</span>
+                    </div>
+                    <h1>Biome</h1>
+                    <p>South Africa's Modern Property Marketplace</p>
+                </div>
+
+                <div class="header-section">
+                    <div class="header-icon">
+                        <span class="material-icons">person_outline</span>
+                    </div>
+                    <h2>Create Your Account</h2>
+                    <span class="subtitle">
+                        Join Biome to discover, buy, rent and manage
+                        properties across South Africa.
+                    </span>
+                </div>
+
+                <form id="signup-form" novalidate>
+
+                    <!-- NAME -->
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="first-name">First Name <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">person_outline</span>
+                                <input type="text" id="first-name" placeholder="Enter your first name" maxlength="50" autocomplete="given-name" required>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="surname">Surname <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">person_outline</span>
+                                <input type="text" id="surname" placeholder="Enter your surname" maxlength="50" autocomplete="family-name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL & PHONE -->
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">mail_outline</span>
+                                <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">phone</span>
+                                <input type="tel" id="phone" placeholder="+27 82 123 4567" autocomplete="tel" maxlength="20" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACCOUNT TYPE & COUNTRY -->
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="account-type">Account Type <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">group_add</span>
+                                <select id="account-type" required>
+                                    <option value="">Select account type</option>
+                                    <option value="buyer">Property Buyer</option>
+                                    <option value="seller">Property Seller</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="country">Country <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">public</span>
+                                <input type="text" id="country" value="South Africa" autocomplete="country-name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="password">Password <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">lock_outline</span>
+                                <input type="password" id="password" placeholder="Create a password" minlength="8" autocomplete="new-password" required>
+                                <span class="material-icons toggle-password"
+                                      role="button"
+                                      tabindex="0"
+                                      aria-label="Show password"
+                                      onclick="togglePassword('password', this)"
+                                      onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); togglePassword('password', this); }">visibility</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="confirm-password">Confirm Password <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="material-icons input-icon">lock_outline</span>
+                                <input type="password" id="confirm-password" placeholder="Confirm your password" minlength="8" autocomplete="new-password" required>
+                                <span class="material-icons toggle-password"
+                                      role="button"
+                                      tabindex="0"
+                                      aria-label="Show password"
+                                      onclick="togglePassword('confirm-password', this)"
+                                      onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); togglePassword('confirm-password', this); }">visibility</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSWORD STRENGTH -->
+                    <div class="password-strength-section">
+                        <div class="strength-label">
+                            Password strength: <span id="strength-text" class="weak">Weak</span>
+                        </div>
+                        <div class="strength-meter">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                        <div class="password-requirements">
+                            <p>Your password must:</p>
+                            <ul>
+                                <li><span class="material-icons req-icon">radio_button_unchecked</span> Be at least 8 characters long</li>
+                                <li><span class="material-icons req-icon">radio_button_unchecked</span> Include a number or symbol</li>
+                                <li><span class="material-icons req-icon">radio_button_unchecked</span> Include uppercase and lowercase letters</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- CREATE ACCOUNT -->
+                    <button id="signup-button" type="submit" class="btn-primary">
+                        <span class="material-icons">person_add</span> Create Account
+                    </button>
+
+                    <!-- STATUS MESSAGE -->
+                    <div id="status-message" class="status-message"></div>
+
+                    <!-- SAFE & SECURE -->
+                    <div class="secure-box">
+                        <span class="material-icons secure-icon">security</span>
+                        <div class="secure-text">
+                            <h4>Safe &amp; Secure</h4>
+                            <p>We respect your privacy and keep your information safe and secure.</p>
+                        </div>
+                    </div>
+
+                    <!-- SIGN IN LINK -->
+                    <div class="signin-link">
+                        Already have an account? <a href="sign-in.html">Sign In <span class="material-icons">arrow_forward</span></a>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+
+        <!-- FOOTER FEATURES -->
+        <footer class="page-footer">
+            <div class="footer-feature">
+                <span class="material-icons">verified_user</span>
+                <h4>Verified Listings</h4>
+                <p>Quality properties you can trust</p>
+            </div>
+            <div class="footer-feature">
+                <span class="material-icons">lock</span>
+                <h4>Secure Platform</h4>
+                <p>Your data is protected 24/7</p>
+            </div>
+            <div class="footer-feature">
+                <span class="material-icons">headset_mic</span>
+                <h4>24/7 Support</h4>
+                <p>We're here to help anytime</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * Toggle password visibility.
+         *
+         * @param {string} inputId     - ID of the input to toggle
+         * @param {HTMLElement} trigger - The clicked/keyed toggle span,
+         *                                passed explicitly so we don't
+         *                                rely on fragile sibling traversal.
+         */
+        function togglePassword(inputId, trigger) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            // Prefer the explicitly-passed trigger; fall back to the
+            // next sibling only if the caller didn't supply one.
+            const icon = trigger || input.nextElementSibling;
+            if (!icon) return;
+
+            const isHidden = input.type === 'password';
+
+            input.type = isHidden ? 'text' : 'password';
+            icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+            icon.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,193 @@
+/* =====================================================
+   BIOME — Universal Back Link
+   Fixed to the top-left corner of the viewport on
+   every page, regardless of navbar, sidebar, or
+   transformed ancestors.
+
+   FLUID SIZING CONTRACT
+   ---------------------
+   • Button size    → clamp() on a single dimension,
+                       aspect-ratio keeps it square.
+   • Corner offset  → clamp() so it tracks the viewport
+                       between a floor and a ceiling.
+   • Icon size      → em, so it scales with the button.
+   • Focus ring     → em, so it scales with the button.
+   • Motion         → respects prefers-reduced-motion.
+
+   The `!important` flags on positioning are intentional:
+   they are the defensive reset that keeps the button
+   anchored even when a smooth-scroll library or a
+   page-transition framework tries to move it.
+   ===================================================== */
+
+/* =====================================================
+   1. Neutralise ancestor containing blocks
+   -----------------------------------------------------
+   Any of the following on html/body silently converts
+   `position: fixed` into `position: absolute` relative
+   to that element, causing the button to scroll with
+   the page. Resetting them restores viewport anchoring.
+   ===================================================== */
+html,
+body {
+    transform: none !important;
+    perspective: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: auto !important;
+    contain: none !important;
+    container-type: normal !important;
+}
+
+/* =====================================================
+   2. Fluid tokens (scoped to this file)
+   -----------------------------------------------------
+   One place to tune every dimension. Every rule below
+   consumes these tokens — no magic numbers further down.
+   ===================================================== */
+:root {
+    /* Button side length — 2.25 rem (36 px) floor →
+       2.75 rem (44 px) ceiling, preferring ~4 vmin. */
+    --bl-size: clamp(2.25rem, 4vmin, 2.75rem);
+
+    /* Corner offset — 0.75 rem (12 px) floor →
+       1.5 rem (24 px) ceiling, preferring ~1.6 vmin. */
+    --bl-inset: clamp(0.75rem, 1.6vmin, 1.5rem);
+
+    /* Hairline border and focus ring, scaled to the button. */
+    --bl-border: 0.0625em;              /* 1 px at 16 px base */
+    --bl-focus-ring: 0.1875em;          /* 3 px at 16 px base */
+    --bl-shadow: 0 0.125em 0.5em rgba(0, 0, 0, 0.05);
+    --bl-shadow-hover: 0 0.25em 0.75em rgba(22, 101, 52, 0.12);
+
+    /* Icon size — a fraction of the button, expressed in em
+       so it inherits the button's font-size. */
+    --bl-icon-size: 1.25em;
+}
+
+/* =====================================================
+   3. The back button itself
+   ===================================================== */
+.back-link {
+    /* --- Positioning: locked to the viewport top-left --- */
+    position: fixed !important;
+    top: var(--bl-inset) !important;
+    left: var(--bl-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+
+    /* --- Fluid square geometry ---
+       One dimension controls the box; aspect-ratio derives
+       the other. The icon scales with `font-size: 1em`
+       because everything inside uses em. */
+    width:  var(--bl-size);
+    height: auto;
+    aspect-ratio: 1 / 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Colour and surface */
+    background: #ffffff;
+    color: #1f2937;
+    border: var(--bl-border) solid #e5e7eb;
+    border-radius: 50%;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    box-shadow: var(--bl-shadow);
+
+    /* Above navbar, sidebar, and every page overlay. */
+    z-index: 9999;
+    isolation: isolate;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.back-link:hover {
+    background: #f0fdf4;
+    border-color: #22c55e;
+    color: #166534;
+
+    /* Nudge is proportional to the button, not a fixed px. */
+    transform: translateX(-0.125em);
+    box-shadow: var(--bl-shadow-hover);
+}
+
+.back-link:focus-visible {
+    outline: none;
+    border-color: #166534;
+    box-shadow: 0 0 0 var(--bl-focus-ring) rgba(34, 197, 94, 0.25);
+}
+
+/* Icon: sized in em so it scales with the button. */
+.back-link svg {
+    display: block;
+    width: var(--bl-icon-size);
+    height: var(--bl-icon-size);
+    pointer-events: none;
+}
+
+/* =====================================================
+   4. Defensive overrides for known page contexts
+   -----------------------------------------------------
+   These pages historically shipped layout rules that
+   pushed the button below a navbar or beside a sidebar.
+   The overrides force the viewport-top-left corner.
+   ===================================================== */
+body:has(#navbarContainer) .back-link,
+body:has(.app) .back-link,
+body:has(.dashboard-layout) .back-link {
+    top: var(--bl-inset) !important;
+    left: var(--bl-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+/* =====================================================
+   5. Responsive
+   -----------------------------------------------------
+   Because size and inset are clamp()-driven, the button
+   is already fluid across every device width. The rules
+   below only tighten the floor on very narrow phones so
+   the button never fights the content for space.
+   Breakpoints are in em so they respect the user's
+   root font size (accessibility).
+   ===================================================== */
+
+/* ---- Phones ---- */
+@media (max-width: 30em) {          /* ≈ 480 px at default 16 px root */
+    :root {
+        --bl-size:  clamp(2rem, 8vw, 2.5rem);      /* 32 px → 40 px */
+        --bl-inset: clamp(0.625rem, 2.5vw, 1rem);  /* 10 px → 16 px */
+        --bl-icon-size: 1.125em;
+    }
+}
+
+/* ---- Very narrow phones ---- */
+@media (max-width: 22.5em) {        /* ≈ 360 px */
+    :root {
+        --bl-size:  clamp(1.875rem, 9vw, 2.25rem); /* 30 px → 36 px */
+        --bl-inset: clamp(0.5rem, 3vw, 0.875rem);  /* 8 px → 14 px */
+    }
+}
+
+/* =====================================================
+   6. Reduced motion
+   ===================================================== */
+@media (prefers-reduced-motion: reduce) {
+    .back-link,
+    .back-link:hover {
+        transition: none;
+        transform: none;
+    }
+}
