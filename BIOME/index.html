@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Biome | Find Your Place in South Africa</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- =====================================================
+         NAVBAR CONTAINER
+    ====================================================== -->
+    <div id="navbarContainer"></div>
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+    <main>
+
+        <!-- =====================================================
+             HERO SEARCH
+        ====================================================== -->
+        <section class="hero" id="hero" aria-label="Property search">
+            <div class="hero-content">
+                <span class="badge">Discover Your Next Space</span>
+                <h1 id="hero-p1">Find Spaces</h1>
+                <h1 id="hero-p2">Built For You</h1>
+                <p id="hero-p3">
+                    Discover apartments, offices, commercial spaces,
+                    and student accommodation throughout South Africa.
+                </p>
+
+                                <form id="searchForm" class="search-card" role="search" aria-label="Property search form">
+
+                    <!-- Primary search bar — circled design -->
+                    <div class="search-bar">
+                        <span class="search-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="heroSearch"
+                            name="search"
+                            class="search-input"
+                            placeholder="Search by keyword, location, or property type..."
+                            autocomplete="off"
+                            aria-label="Search properties"
+                        >
+
+                        <button type="submit" class="search-button" aria-label="Search">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                </form>
+
+                <div class="hero-browse">
+                    <a href="property-listings.html" class="browse-link">
+                        Browse All Listings <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TRUST INDICATORS
+        ====================================================== -->
+        <section class="trust-section" id="trust" aria-label="Trust indicators">
+            <div class="trust-container">
+                <div class="trust-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Verified Listings</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Secure Accounts</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Property Owners</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fa-solid fa-flag"></i>
+                    <span>South African Marketplace</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             CATEGORIES SECTION
+        ====================================================== -->
+        <section class="categories-section" id="categories" aria-label="Property categories">
+            <div class="categories-container">
+                <div class="section-header">
+                    <h2>Browse by Category</h2>
+                    <p>Find the perfect space for your needs</p>
+                </div>
+                <div class="categories-grid">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <h3>Residential</h3>
+                        <p>Houses, apartments, and homes</p>
+                        <a href="property-listings.html" class="category-link" data-category-match="residential">Explore →</a>
+                    </div>
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <h3>Commercial</h3>
+                        <p>Office spaces and retail</p>
+                        <a href="property-listings.html" class="category-link" data-category-match="commercial">Explore →</a>
+                    </div>
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <h3>Student Accommodation</h3>
+                        <p>Near campuses and universities</p>
+                        <a href="property-listings.html" class="category-link" data-category-match="student">Explore →</a>
+                    </div>
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="fa-solid fa-warehouse"></i>
+                        </div>
+                        <h3>Industrial</h3>
+                        <p>Warehouses and factories</p>
+                        <a href="property-listings.html" class="category-link" data-category-match="industrial">Explore →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             FEATURED LISTINGS
+        ====================================================== -->
+        <section class="featured-section" id="featured" aria-label="Featured listings">
+            <div class="section-header">
+                <h2>Latest Approved Listings</h2>
+                <p>Browse the newest verified properties available on Biome.</p>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div class="property-grid" id="featuredLoading">
+                <div class="property-card skeleton-card">
+                    <div class="skeleton skeleton-image"></div>
+                    <div class="property-body">
+                        <div class="skeleton skeleton-text" style="width:70%;"></div>
+                        <div class="skeleton skeleton-text" style="width:50%;"></div>
+                        <div class="skeleton skeleton-text" style="width:60%;"></div>
+                    </div>
+                </div>
+                <div class="property-card skeleton-card">
+                    <div class="skeleton skeleton-image"></div>
+                    <div class="property-body">
+                        <div class="skeleton skeleton-text" style="width:70%;"></div>
+                        <div class="skeleton skeleton-text" style="width:50%;"></div>
+                        <div class="skeleton skeleton-text" style="width:60%;"></div>
+                    </div>
+                </div>
+                <div class="property-card skeleton-card">
+                    <div class="skeleton skeleton-image"></div>
+                    <div class="property-body">
+                        <div class="skeleton skeleton-text" style="width:70%;"></div>
+                        <div class="skeleton skeleton-text" style="width:50%;"></div>
+                        <div class="skeleton skeleton-text" style="width:60%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actual listings grid -->
+            <div class="property-grid" id="featuredGrid" style="display:none;"></div>
+
+            <!-- Empty state -->
+            <div id="featuredEmpty" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-house-circle-xmark empty-icon"></i>
+                <h3>No Properties Available</h3>
+                <p>Check back later for newly approved listings.</p>
+            </div>
+
+            <!-- Error state -->
+            <div id="featuredError" class="empty-state" style="display:none;">
+                <i class="fa-solid fa-triangle-exclamation empty-icon" style="color:var(--red);"></i>
+                <h3>Unable to Load Listings</h3>
+                <p>Please refresh the page or try again later.</p>
+            </div>
+
+            <div class="section-cta">
+                <a href="property-listings.html" class="btn-primary-lg">
+                    View All Listings <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             WHY LIST ON BIOME (HOSTS BAND)
+        ====================================================== -->
+        <section class="host-band-section" id="hosts" aria-label="Why list on Biome">
+            <div class="host-band">
+                <div>
+                    <h2>Why List on Biome?</h2>
+                    <p>
+                        Reach verified renters across South Africa, manage enquiries in one place,
+                        and fill vacancies faster — whether you own one apartment or an entire portfolio.
+                    </p>
+                </div>
+                <a href="#" id="becomeHostBtn" class="host-band-btn">
+                    Become a Host <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             ABOUT SECTION
+        ====================================================== -->
+        <section class="about-section" id="about" aria-label="About Biome">
+            <div class="about-container">
+                <div class="section-header">
+                    <h2>About Biome</h2>
+                    <p>South Africa's Modern Property Marketplace</p>
+                </div>
+                <p class="about-text">
+                    Biome is South Africa's modern property marketplace, connecting
+                    property owners with potential tenants and buyers. We believe in
+                    making property discovery simple, transparent, and accessible to everyone.
+                    Whether you're looking for your next home, office space, or investment
+                    property, Biome helps you find your place in the world.
+                </p>
+                <div class="about-grid">
+                    <div class="about-card">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <h4>Verified Listings</h4>
+                        <p>Every property is verified for authenticity</p>
+                    </div>
+                    <div class="about-card">
+                        <i class="fa-solid fa-users"></i>
+                        <h4>Community Focused</h4>
+                        <p>Built for South Africans, by South Africans</p>
+                    </div>
+                    <div class="about-card">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        <h4>Mobile First</h4>
+                        <p>Find your space on any device</p>
+                    </div>
+                    <div class="about-card">
+                        <i class="fa-solid fa-handshake"></i>
+                        <h4>Trust &amp; Safety</h4>
+                        <p>Secure payments and verified users</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+    <footer class="footer" id="footer" aria-label="Site footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="logo-circle">B</div>
+                    <h2>biome</h2>
+                </div>
+                <p>A connected ecosystem of people and spaces. Find your place in the world.</p>
+            </div>
+
+            <div class="footer-links">
+                <h3>Explore</h3>
+                <a href="property-listings.html">All Properties</a>
+                <a href="property-listings.html" data-category-match="residential">Residential</a>
+                <a href="property-listings.html" data-category-match="commercial">Commercial</a>
+                <a href="property-listings.html" data-category-match="student">Student Accommodation</a>
+            </div>
+
+            <div class="footer-links">
+                <h3>Account</h3>
+                <a href="sign-in.html">Sign In</a>
+                <a href="sign-up.html">Create Account</a>
+                <a href="seller-dashboard.html">Seller Dashboard</a>
+                <a href="buyer-dashboard.html">Buyer Dashboard</a>
+            </div>
+
+            <div class="footer-links">
+                <h3>Company</h3>
+                <a href="#about">About</a>
+                <a href="#">Contact</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+
+            <div class="footer-links">
+                <h3>Support</h3>
+                <a href="#">Help Centre</a>
+                <a href="#">Report Listing</a>
+                <a href="#">FAQs</a>
+                <a href="#">Contact Support</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Biome Technologies. All rights reserved.</p>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Cookies</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- =====================================================
+         SCRIPTS – LOAD IN ORDER
+    ====================================================== -->
+
+    <!-- Core -->
+    <script src="js/core/supabase.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/ui.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/storage.js"></script>
+
+    <!-- Services -->
+    <script src="js/services/listingService.js"></script>
+    <script src="js/services/mediaService.js"></script>
+    <script src="js/services/profileService.js"></script>
+    <script src="js/services/propertyService.js"></script>
+
+    <!-- Components -->
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/propertyCard.js"></script>
+    <script src="js/components/toast.js"></script>
+
+    <!-- Page Script -->
+    <script src="js/pages/home.js"></script>
+</body>
+</html>

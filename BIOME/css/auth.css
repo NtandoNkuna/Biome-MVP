@@ -1,0 +1,985 @@
+/* ==========================================================
+   BIOME PROPERTY MARKETPLACE
+   AUTHENTICATION STYLES
+   Shared base + per-page overrides.
+
+   FLUID SIZING CONTRACT
+   ---------------------
+   Every dimension that governs layout, spacing, or
+   typography uses one of the following patterns:
+     • clamp(min, preferred, max) — for anything with a
+       natural floor and ceiling (font-size, padding, gap,
+       width, height, radius).
+     • % of parent — for widths inside a known container.
+     • vw / vmin — as the "preferred" middle term of a
+       clamp(), so size tracks the viewport.
+     • em / rem — for radii and rhythm that should scale
+       with local text or the root font.
+     • aspect-ratio — replaces paired width/height where
+       an element must stay proportional.
+   No fixed pixel dimensions remain for layout-critical
+   properties. Fixed values that survive are only
+   1px hairlines, 2px borders, and content-free svg strokes.
+
+   TABLE OF CONTENTS
+     00. Fluid tokens
+     01. Imports & reset
+     02. Design tokens
+     03. Body & page wrapper
+     04. Logo & header block
+     05. Illustration
+     06. Header section
+     07. Form elements
+     08. Form options
+     09. Password strength
+     10. Buttons
+     11. Divider
+     12. Social buttons
+     13. Secure box
+     14. Sign-in / sign-up links
+     15. Status message
+     16. Footer features
+     17. Responsive (layout-only breakpoints)
+     18. Fallback scoping
+   ========================================================== */
+
+
+/* =====================================================
+   00. FLUID TOKENS
+   Reusable scale — every section below consumes these
+   so the rhythm stays consistent and one change updates
+   every consumer.
+   ===================================================== */
+
+:root {
+    /* Spacing — 4 px floor → 48 px ceiling */
+    --f-space-2xs: clamp(0.25rem, 0.4vw, 0.5rem);
+    --f-space-xs:  clamp(0.375rem, 0.7vw, 0.75rem);
+    --f-space-sm:  clamp(0.5rem,   1vw,   0.875rem);
+    --f-space-md:  clamp(0.75rem,  1.5vw, 1.25rem);
+    --f-space-lg:  clamp(1rem,     2.5vw, 2rem);
+    --f-space-xl:  clamp(1.5rem,   4vw,   3rem);
+    --f-space-2xl: clamp(2rem,     6vw,   4rem);
+
+    /* Type — 12 px floor → 56 px ceiling */
+    --f-fs-xs:  clamp(0.75rem,  0.85vw, 0.875rem);
+    --f-fs-sm:  clamp(0.875rem, 1vw,    1rem);
+    --f-fs-md:  clamp(0.9375rem,1.1vw,  1.0625rem);
+    --f-fs-lg:  clamp(1rem,     1.3vw,  1.25rem);
+    --f-fs-xl:  clamp(1.125rem, 1.7vw,  1.5rem);
+    --f-fs-2xl: clamp(1.375rem, 2.5vw,  2rem);
+    --f-fs-3xl: clamp(1.75rem,  4vw,    3rem);
+    --f-fs-4xl: clamp(2.25rem,  6vw,    3.5rem);
+
+    /* Radii — scales with local font where applied */
+    --f-radius-sm: 0.5rem;
+    --f-radius-md: 0.75rem;
+    --f-radius-lg: 1rem;
+    --f-radius-xl: 1.25rem;
+    --f-radius-2xl: 1.5rem;
+
+    /* Icon / badge sizes */
+    --f-icon-sm: clamp(1.125rem, 1.6vw, 1.375rem);
+    --f-icon-md: clamp(1.375rem, 2.2vw, 1.875rem);
+    --f-icon-lg: clamp(1.75rem,   3.5vw, 2.75rem);
+    --f-icon-xl: clamp(2.5rem,    6vw,   4.5rem);
+}
+
+
+/* =====================================================
+   01. IMPORTS & RESET
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+/* =====================================================
+   02. DESIGN TOKENS
+   ===================================================== */
+
+:root {
+    --primary: #166534;
+    --primary-hover: #15803d;
+    --primary-light: #22c55e;
+    --primary-bg: #f0fdf4;
+    --background: #f8fafc;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --border: #e5e7eb;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --white: #ffffff;
+}
+
+
+/* =====================================================
+   03. BODY & PAGE WRAPPER
+   ===================================================== */
+
+body {
+    min-height: 100dvh;          /* dynamic viewport height — stable with mobile UI */
+    background: var(--white);
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    width: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Top / side / bottom — fluid. Bottom is deliberately
+       larger so the form doesn't kiss the footer features. */
+    padding:
+        var(--f-space-2xl)
+        var(--f-space-xl)
+        calc(var(--f-space-2xl) * 2.5);
+
+    width: 100%;
+}
+
+.card-content {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Per-page content width. Uses :has() so both pages share
+   this stylesheet without one block silently overriding
+   the other. Fallback: see Section 18.
+   Sign-up: wider two-column form.
+   Sign-in: narrower single-column card. */
+body:has(#signup-form) .card-content {
+    max-width: min(90%, 65rem);          /* ≈ 1040 px at desktop, tracks viewport below */
+}
+
+body:has(#signin-form) .card-content {
+    max-width: min(90%, 40rem);          /* ≈ 640 px at desktop */
+}
+
+
+/* =====================================================
+   04. LOGO & HEADER BLOCK
+   ===================================================== */
+
+.logo {
+    text-align: center;
+    margin-block-end: var(--f-space-xl);
+}
+
+.logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Square badge, scales with viewport width. */
+    width:  clamp(4rem, 7vw, 5.25rem);
+    aspect-ratio: 1 / 1;
+
+    background: var(--primary-bg);
+    border-radius: var(--f-radius-2xl);
+    margin-block-end: var(--f-space-md);
+}
+
+.logo-icon .material-icons {
+    font-size: var(--f-icon-lg);
+    color: var(--primary);
+}
+
+.logo h1 {
+    font-size: var(--f-fs-4xl);
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-block-end: var(--f-space-2xs);
+    line-height: 1.05;
+}
+
+.logo p {
+    color: var(--text-light);
+    font-size: var(--f-fs-md);
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   05. ILLUSTRATION
+   ===================================================== */
+
+.illustration {
+    display: flex;
+    justify-content: center;
+    margin-block-end: var(--f-space-xl);
+}
+
+.illustration-circle {
+    width:  clamp(7rem, 12vw, 9rem);
+    aspect-ratio: 1 / 1;
+    background: var(--primary-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 0.125em solid #dcfce7;
+}
+
+.illustration-circle .material-icons {
+    font-size: var(--f-icon-xl);
+    color: var(--primary);
+    opacity: 0.85;
+}
+
+/* --- SIGN-IN ONLY -----------------------------------------
+   Sign-up has no .illustration element. Hiding it on sign-in
+   removes the extra vertical block between the logo and the
+   header section, matching sign-up's rhythm. */
+body:has(#signin-form) .illustration {
+    display: none;
+}
+
+
+/* =====================================================
+   06. HEADER SECTION
+   ===================================================== */
+
+.header-section {
+    text-align: center;
+    margin-block-end: var(--f-space-xl);
+}
+
+.header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width:  clamp(3rem, 5vw, 3.75rem);
+    aspect-ratio: 1 / 1;
+
+    background: #f3f4f6;
+    border-radius: 50%;
+    margin-block-end: var(--f-space-md);
+}
+
+.header-icon .material-icons {
+    font-size: var(--f-icon-md);
+    color: var(--text-light);
+}
+
+.header-section h2,
+.login-card h2 {
+    color: var(--text);
+    font-size: var(--f-fs-3xl);
+    font-weight: 700;
+    margin-block-end: var(--f-space-sm);
+    line-height: 1.2;
+}
+
+.subtitle {
+    color: var(--text-light);
+    font-size: var(--f-fs-lg);
+    line-height: 1.65;
+    max-width: min(85%, 42rem);
+    margin-inline: auto;
+}
+
+/* --- SIGN-IN ONLY -----------------------------------------
+   Sign-up markup contains .header-icon inside .header-section.
+   Sign-in markup does not. Reproduce the same circular badge
+   using a ::before on the parent. */
+body:has(#signin-form) .header-section::before {
+    content: "login";
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width:  clamp(3rem, 5vw, 3.75rem);
+    aspect-ratio: 1 / 1;
+
+    background: #f3f4f6;
+    border-radius: 50%;
+    color: var(--text-light);
+    font-size: var(--f-icon-md);
+    margin-block-end: var(--f-space-md);
+}
+
+
+/* =====================================================
+   07. FORM ELEMENTS
+   ===================================================== */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--f-space-xl);
+    margin-block-end: var(--f-space-xl);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-block-end: var(--f-space-lg);
+}
+
+.form-row .input-group:last-child { margin-block-end: 0; }
+
+label {
+    display: block;
+    margin-block-end: var(--f-space-sm);
+    font-size: var(--f-fs-md);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.required {
+    color: var(--danger);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Icon positions and sizes track the input's local font
+   size via em, so they stay anchored to the input even as
+   the input grows or shrinks. */
+.input-icon {
+    position: absolute;
+    left: 1.4em;
+    color: #9ca3af;
+    font-size: var(--f-icon-sm);
+    pointer-events: none;
+    transition: color 0.3s;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1.4em;
+    color: #9ca3af;
+    font-size: var(--f-icon-sm);
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.toggle-password:hover {
+    color: var(--primary);
+}
+
+.input-wrapper input,
+.input-wrapper select {
+    width: 100%;
+    padding:
+        1.25em
+        1.5em
+        1.25em
+        3.875em;         /* left pad leaves room for the icon */
+    background: #f9fafb;
+    border: 0.125em solid var(--border);
+    border-radius: var(--f-radius-lg);
+    font-size: var(--f-fs-md);
+    color: var(--text);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    outline: none;
+    appearance: none;
+}
+
+.input-wrapper select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.4em center;
+    background-size: 1.25em;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    background: var(--white);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.3125em rgba(34, 197, 94, 0.1);
+}
+
+.input-wrapper input:focus + .input-icon,
+.input-wrapper select:focus + .input-icon {
+    color: var(--primary);
+}
+
+/* --- SIGN-IN ONLY -----------------------------------------
+   Sign-up markup carries a red asterisk in every required
+   field's label. Sign-in does not. Both sign-in fields are
+   required, so the asterisk is injected via CSS. */
+body:has(#signin-form) .input-group > label::after {
+    content: " *";
+    color: var(--danger);
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   08. FORM OPTIONS (Remember / Forgot)
+   ===================================================== */
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-block-end: var(--f-space-xl);
+    gap: var(--f-space-md);
+    flex-wrap: wrap;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: var(--f-space-sm);
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Checkbox: a hair under the line-height so it sits on the
+   same optical baseline as the label, and scales with the
+   label's font-size. */
+.remember input {
+    width: 1.25em;
+    height: 1.25em;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.form-options a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: var(--f-fs-md);
+    font-weight: 600;
+    transition: color 0.25s;
+}
+
+.form-options a:hover {
+    color: var(--primary-hover);
+}
+
+
+/* =====================================================
+   09. PASSWORD STRENGTH
+   Hidden by default; JS adds `.is-visible` the moment the
+   user types into #password.
+   ===================================================== */
+
+.password-strength-section {
+    display: none;
+
+    margin-block-end: var(--f-space-xl);
+    background: #f9fafb;
+    padding: var(--f-space-lg) var(--f-space-xl);
+    border-radius: var(--f-radius-2xl);
+    border: 1px solid var(--border);
+}
+
+.password-strength-section.is-visible {
+    display: block;
+    animation: strengthFadeIn 0.35s ease both;
+}
+
+@keyframes strengthFadeIn {
+    from { opacity: 0; transform: translateY(-0.5rem); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.strength-label {
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    margin-block-end: var(--f-space-sm);
+}
+
+.strength-label .weak   { color: #dc2626; font-weight: 600; }
+.strength-label .medium { color: #d97706; font-weight: 600; }
+.strength-label .strong { color: #16a34a; font-weight: 600; }
+
+.strength-meter {
+    height: clamp(0.5rem, 0.9vw, 0.625rem);
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-block-end: var(--f-space-md);
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+.strength-bar.weak   { width: 25%;  background-color: #dc2626; }
+.strength-bar.medium { width: 60%;  background-color: #d97706; }
+.strength-bar.strong { width: 100%; background-color: #16a34a; }
+
+.password-requirements p {
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    margin-block-end: var(--f-space-sm);
+    font-weight: 500;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+}
+
+.password-requirements li {
+    display: flex;
+    align-items: center;
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    margin-block-end: var(--f-space-sm);
+    line-height: 1.5;
+}
+
+.password-requirements li:last-child { margin-block-end: 0; }
+
+.req-icon {
+    font-size: var(--f-icon-sm) !important;
+    margin-inline-end: var(--f-space-sm);
+    color: #d1d5db;
+    flex-shrink: 0;
+}
+
+.req-icon.valid {
+    color: var(--success);
+}
+
+
+/* =====================================================
+   10. BUTTONS
+   ===================================================== */
+
+.btn-primary {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--f-space-sm);
+    border: none;
+    border-radius: var(--f-radius-lg);
+    padding: 1.375em 1.5em;
+    background: var(--primary);
+    color: white;
+    font-size: var(--f-fs-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    margin-block-start: var(--f-space-sm);
+    margin-block-end: var(--f-space-xl);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-0.125rem);
+    box-shadow: 0 0.75rem 1.875rem rgba(22, 101, 52, 0.22);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-primary .material-icons {
+    font-size: var(--f-icon-sm);
+}
+
+/* --- SIGN-IN ONLY -----------------------------------------
+   Sign-up places its button icon BEFORE the label.
+   Sign-in places it AFTER. Reversing the flex direction
+   makes the sign-in icon lead the label. */
+body:has(#signin-form) #signin-button {
+    flex-direction: row-reverse;
+}
+
+body:has(#signin-form) #signin-button .material-icons {
+    font-size: var(--f-icon-sm);
+}
+
+
+/* =====================================================
+   11. DIVIDER
+   ===================================================== */
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin-block: var(--f-space-xl);
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+.divider span {
+    margin-inline: var(--f-space-md);
+    color: var(--text-light);
+    font-size: var(--f-fs-sm);
+    font-weight: 600;
+    background: var(--white);
+    padding-inline: var(--f-space-md);
+    letter-spacing: 0.06em;
+}
+
+
+/* =====================================================
+   12. SOCIAL BUTTONS
+   Currently used only on sign-in.
+   ===================================================== */
+
+.social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--f-space-md);
+    margin-block-end: var(--f-space-xl);
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--f-space-md);
+    width: 100%;
+    padding: 1.25em;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--f-radius-lg);
+    font-size: var(--f-fs-md);
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-social:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    box-shadow: 0 0.375rem 1rem rgba(0, 0, 0, 0.06);
+}
+
+/* Svg icons: sized in em so they track the button's font. */
+.btn-social svg {
+    width: 1.375em;
+    height: 1.375em;
+    flex-shrink: 0;
+}
+
+
+/* =====================================================
+   13. SECURE BOX
+   Used on sign-up only.
+   ===================================================== */
+
+.secure-box {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--f-space-md);
+    background: var(--primary-bg);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--f-radius-2xl);
+    padding: var(--f-space-lg) var(--f-space-xl);
+    margin-block-end: var(--f-space-xl);
+}
+
+.secure-icon {
+    color: var(--primary);
+    font-size: var(--f-icon-lg);
+    flex-shrink: 0;
+}
+
+.secure-text h4 {
+    font-size: var(--f-fs-lg);
+    font-weight: 600;
+    color: var(--primary);
+    margin-block-end: var(--f-space-2xs);
+}
+
+.secure-text p {
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   14. SIGN-IN / SIGN-UP LINKS
+   ===================================================== */
+
+.signin-link,
+.signup-link {
+    text-align: center;
+    font-size: var(--f-fs-md);
+    color: var(--text-light);
+    margin-block-end: var(--f-space-xl);
+    line-height: 1.6;
+}
+
+.signin-link a,
+.signup-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--f-space-2xs);
+    transition: color 0.25s;
+    margin-inline-start: var(--f-space-2xs);
+}
+
+.signin-link a:hover,
+.signup-link a:hover {
+    color: var(--primary-hover);
+}
+
+.signin-link a .material-icons,
+.signup-link a .material-icons {
+    font-size: 1.25em;
+}
+
+
+/* =====================================================
+   15. STATUS MESSAGE
+   ===================================================== */
+
+.status-message {
+    display: none;
+    margin-block-end: var(--f-space-lg);
+    padding: var(--f-space-md) var(--f-space-lg);
+    border-radius: var(--f-radius-lg);
+    text-align: center;
+    font-size: var(--f-fs-md);
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.status-message.success {
+    display: block;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #22c55e;
+}
+
+.status-message.error {
+    display: block;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #ef4444;
+}
+
+.status-message.info {
+    display: block;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #38bdf8;
+}
+
+
+/* =====================================================
+   16. FOOTER FEATURES
+   ===================================================== */
+
+.page-footer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    /* Gap tracks the viewport so wide screens get air and
+       narrow screens don't waste horizontal space. */
+    gap: clamp(1.5rem, 6vw, 6rem);
+
+    width: 100%;
+    padding: var(--f-space-2xl) var(--f-space-xl);
+    background: #f8fafc;
+    border-block-start: 1px solid var(--border);
+    margin-block-start: auto;
+}
+
+.footer-feature {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--f-space-sm);
+
+    /* Each feature takes at most a third of the row on
+       wide screens, full width on mobile. */
+    flex: 0 1 min(100%, 14rem);
+}
+
+.footer-feature .material-icons {
+    font-size: var(--f-icon-lg);
+    color: var(--primary);
+    background: var(--white);
+    padding: var(--f-space-sm);
+    border-radius: 50%;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+    aspect-ratio: 1 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-feature h4 {
+    font-size: var(--f-fs-md);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.footer-feature p {
+    font-size: var(--f-fs-sm);
+    color: var(--text-light);
+    max-width: 14rem;
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   17. RESPONSIVE
+   Since typography, padding, and radii now scale with the
+   viewport, the breakpoints below only handle *structural*
+   changes — collapsing the two-column form, flipping the
+   footer, tightening lateral padding on phones.
+   Breakpoints are in em so they respect the user's root
+   font-size (accessibility).
+   ===================================================== */
+
+/* ---- Large tablets and small laptops ---- */
+@media (max-width: 64em) {          /* ≈ 1024 px at default 16 px root */
+    body:has(#signup-form) .card-content {
+        max-width: min(92%, 65rem);
+    }
+}
+
+/* ---- Tablets in portrait ---- */
+@media (max-width: 48em) {          /* ≈ 768 px */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin-block-end: 0;
+    }
+
+    /* Every input-group in the stacked form gets a
+       consistent rhythm below it. */
+    .form-row .input-group {
+        margin-block-end: var(--f-space-lg);
+    }
+
+    .page-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--f-space-xl);
+        padding-block: var(--f-space-xl);
+    }
+
+    /* Let the subtext reflow naturally on a narrow column. */
+    .subtitle {
+        max-width: 90%;
+    }
+}
+
+/* ---- Phones ---- */
+@media (max-width: 30em) {          /* ≈ 480 px */
+    /* Tighten lateral space so the form can breathe
+       without forcing text to wrap. */
+    .main-content {
+        padding-inline: var(--f-space-md);
+    }
+
+    /* Bring the illustration down a step on very small
+       screens so it doesn't dominate the fold. */
+    .illustration-circle {
+        width: clamp(5.5rem, 22vw, 7rem);
+    }
+
+    /* Password strength and secure box already use fluid
+       padding; nudge the outer margin so they don't feel
+       too loose against the smaller inputs. */
+    .password-strength-section {
+        margin-block-end: var(--f-space-lg);
+    }
+
+    .secure-box {
+        padding: var(--f-space-md) var(--f-space-lg);
+    }
+}
+
+/* ---- Very narrow phones ---- */
+@media (max-width: 22.5em) {        /* ≈ 360 px */
+    .main-content {
+        padding-inline: var(--f-space-sm);
+    }
+
+    /* Icons inside the input shrink slightly to keep
+       the left padding from squeezing the value area. */
+    .input-wrapper input,
+    .input-wrapper select {
+        padding-inline-start: 3.5em;
+    }
+
+    .input-icon { left: 1.15em; }
+    .toggle-password { right: 1.15em; }
+}
+
+
+/* =====================================================
+   18. FALLBACK SCOPING
+   Only needed if :has() is unsupported by your browser
+   target. Add class="signup-page" or class="signin-page"
+   to <body> and these rules take over.
+   ===================================================== */
+
+body.signup-page .card-content {
+    max-width: min(90%, 65rem);
+}
+
+body.signin-page .card-content {
+    max-width: min(90%, 40rem);
+}
+
+@media (max-width: 64em) {
+    body.signup-page .card-content {
+        max-width: min(92%, 65rem);
+    }
+}
