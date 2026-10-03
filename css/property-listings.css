@@ -5,6 +5,7 @@
     • Results ribbon hosts count + sort control
     • Full content-width alignment across all zones
     • Improved focus, motion & responsive behaviour
+    • Search bar: larger hit area, black input text
 
     FLUID SIZING CONTRACT
     ---------------------
@@ -33,6 +34,9 @@
 
     --pl-text:          #182019;
     --pl-muted:         #68746A;
+
+    /* Pure black for text entered on the white search surface */
+    --pl-input-text:    #000000;
 
     /* Shadows — em-based so blur scales with local font */
     --pl-shadow-sm: 0 0.0625em 0.125em rgba(0, 0, 0, 0.04);
@@ -75,10 +79,14 @@
     --pl-content-max:   73.75rem;   /* ≈ 1180 px */
     --pl-content-pad:   clamp(1rem, 3vw, 1.5rem);
 
-    /* ---- Inputs ---- */
-    --pl-input-h:       clamp(2.375rem, 3.5vw, 3.25rem);   /* 38 → 52 px */
-    --pl-input-pad-x:   clamp(0.75rem, 1.2vw, 1.125rem);
-    --pl-input-fs:      var(--pl-fs-md);
+    /* ---- Inputs ----
+       Search bar is taller and its text is larger than the
+       generic filter inputs so the primary action reads as such.
+       Range bumped: 44 → 60 px tall, 14 → 16 px text. */
+    --pl-input-h:       clamp(2.75rem, 4vw, 3.75rem);      /* 44 → 60 px */
+    --pl-input-pad-x:   clamp(0.875rem, 1.4vw, 1.25rem);
+    --pl-input-fs:      var(--pl-fs-lg);                   /* 14 → 16 px */
+    --pl-input-icon:    clamp(1rem, 1.3vw, 1.25rem);       /* magnifier */
 
     /* ---- Focus ring (em-based so it scales) ---- */
     --pl-focus-ring: 0 0 0 0.1875em rgba(15, 61, 46, 0.1);
@@ -159,51 +167,126 @@ body {
     align-items: stretch;
 }
 
+/* ---- Search bar (primary action) ----
+   Taller, wider, heavier shadow, thicker border, and a slightly
+   larger radius than the surrounding controls so it reads as the
+   page's primary input. */
 .filters-container .search-bar {
     flex: 1 1 auto;
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: var(--pl-space-sm);
+    gap: var(--pl-space-md);
     background: var(--pl-surface);
-    border: 1px solid var(--pl-border);
-    border-radius: var(--pl-radius-md);
+    border: 1.5px solid var(--pl-border-strong);
+    border-radius: var(--pl-radius-lg);
     padding-inline: var(--pl-input-pad-x);
     height: var(--pl-input-h);
     margin: 0;
-    box-shadow: var(--pl-shadow-sm);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--pl-shadow-md);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease,
+                background-color 0.2s ease;
+}
+
+.filters-container .search-bar:hover {
+    border-color: var(--pl-green-500);
+    box-shadow: 0 0.375em 1em rgba(0, 0, 0, 0.08);
 }
 
 .filters-container .search-bar:focus-within {
     border-color: var(--pl-green-900);
-    box-shadow: var(--pl-focus-ring);
+    box-shadow: var(--pl-focus-ring), var(--pl-shadow-md);
+    background: #FFFFFF;
 }
 
-.filters-container .search-bar i {
-    color: var(--pl-muted);
-    font-size: var(--pl-icon-md);
+/* Magnifier icon — larger and darker to match the taller bar. */
+.filters-container .search-bar > i,
+.filters-container .search-bar > .fa-solid,
+.filters-container .search-bar > .fas {
+    color: var(--pl-green-900);
+    font-size: var(--pl-input-icon);
+    line-height: 1;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;   /* clicks pass through to the bar handler */
+    transition: color 0.2s ease;
 }
 
+.filters-container .search-bar:focus-within > i,
+.filters-container .search-bar:focus-within > .fa-solid,
+.filters-container .search-bar:focus-within > .fas {
+    color: var(--pl-green-700);
+}
+
+/* ---- The input itself ----
+   flex-native sizing so it fills the visible bar end-to-end;
+   black text on the white surface; no UA chrome. */
 .filters-container .search-bar input {
     border: none;
     outline: none;
-    font: inherit;
     font-family: inherit;
     font-size: var(--pl-input-fs);
-    color: var(--pl-text);
-    width: 100%;
-    height: 100%;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+
+    /* Pure black for entered text — reads cleanly on the white bar. */
+    color: var(--pl-input-text);
+    caret-color: var(--pl-green-900);
+
     background: transparent;
-    padding: 0;
     box-shadow: none;
+    margin: 0;
+
+    /* Fill remaining horizontal space without fighting the icon */
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+
+    /* Fill the bar's height so clicks anywhere inside it land on the input. */
+    align-self: stretch;
+    height: auto;
+
+    /* Vertical centring comes from the flex box, not from padding. */
+    padding: 0;
+    cursor: text;
+
+    /* Guard against any UA style that could freeze the field. */
+    pointer-events: auto;
+
+    /* Kill any webkit autofill background / text overlay. */
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .filters-container .search-bar input::placeholder {
     color: var(--pl-muted);
+    font-weight: 400;
+    opacity: 1;
 }
 
+/* Autofill: Chrome/Safari tint the field yellow by default —
+   force it back to black-on-white. */
+.filters-container .search-bar input:-webkit-autofill,
+.filters-container .search-bar input:-webkit-autofill:hover,
+.filters-container .search-bar input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--pl-input-text);
+    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Defensive override in case another stylesheet freezes the field. */
+.filters-container .search-bar input:disabled,
+.filters-container .search-bar input[readonly] {
+    opacity: 1;
+    cursor: text;
+    color: var(--pl-input-text);
+    background: transparent;
+}
+
+/* ---- View buttons ---- */
 .filters-container .view-buttons {
     display: flex;
     gap: var(--pl-space-sm);
@@ -221,7 +304,7 @@ body {
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-md);
     color: var(--pl-text);
-    font-size: var(--pl-icon-md);
+    font-size: var(--pl-icon-lg);
     cursor: pointer;
     font-family: inherit;
     line-height: 1;
