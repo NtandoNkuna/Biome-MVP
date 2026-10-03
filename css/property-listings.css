@@ -149,7 +149,7 @@ body {
     display: flex;
     align-items: center;
     gap: var(--pl-space-sm);
-    background: var(--pl-surface);
+    background: #FFFFFF;
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-sm);
     padding-inline: var(--pl-input-pad-x);
@@ -186,10 +186,16 @@ body {
     color: var(--pl-green-900);
 }
 
-/* ---- Search input: text is ALWAYS black ----
-   Covers every state and uses -webkit-text-fill-color, which wins over
-   `color` in Chrome/Safari/Edge. !important guards against global
-   input styles in other stylesheets (e.g. a dark-theme or style.css rule). */
+/* ---- Search input: typed text must ALWAYS be visible ----
+   Hardened against: collapsed width/height, white or transparent text
+   inherited from other stylesheets, text-indent / font-size resets,
+   blend modes, overlays and hidden overflow. */
+.filters-container .search-bar {
+    position: relative;
+    overflow: visible;
+    isolation: isolate;
+}
+
 .filters-container .search-bar input,
 .filters-container .search-bar input[type="text"],
 .filters-container .search-bar input[type="search"],
@@ -197,32 +203,49 @@ body {
 .filters-container .search-bar input:focus,
 .filters-container .search-bar input:active,
 .filters-container .search-bar input:focus-visible,
+.filters-container .search-bar input:not(:placeholder-shown),
 .filters-container .search-bar input:disabled,
 .filters-container .search-bar input[readonly] {
-    color: var(--pl-input-text) !important;
-    -webkit-text-fill-color: var(--pl-input-text) !important;
+    /* visible text */
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    text-shadow: none !important;
+    text-indent: 0 !important;
+    text-transform: none;
+    mix-blend-mode: normal;
+    opacity: 1 !important;
+    visibility: visible !important;
     caret-color: var(--pl-green-900);
-    opacity: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    box-shadow: none;
 
-    font-family: inherit;
-    font-size: var(--pl-input-fs);
-    font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: 0;
+    /* solid white behind the text so nothing can hide it */
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
 
-    flex: 1 1 auto;
+    /* real, non-collapsing box */
+    display: block !important;
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0%;
+    width: 100%;
     min-width: 0;
-    width: auto;
-    height: auto;
-    align-self: stretch;
+    height: 100%;
+    min-height: calc(var(--pl-input-h) - 2px);
     margin: 0;
     padding: 0;
+
+    /* readable type */
+    font-family: inherit;
+    font-size: max(16px, var(--pl-input-fs));  /* 16px min also stops iOS zoom */
+    font-weight: 500;
+    line-height: normal;
+    letter-spacing: 0;
     cursor: text;
-    pointer-events: auto;
+    pointer-events: auto !important;
+    user-select: text;
+    -webkit-user-select: text;
     -webkit-appearance: none;
     appearance: none;
 }
@@ -235,9 +258,9 @@ body {
 }
 
 .filters-container .search-bar input::selection {
-    background: var(--pl-green-100);
-    color: var(--pl-input-text);
-    -webkit-text-fill-color: var(--pl-input-text);
+    background: #CFE8DA;
+    color: #000000;
+    -webkit-text-fill-color: #000000;
 }
 
 /* Remove the native clear "x" so it does not clash with the design */
