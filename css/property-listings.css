@@ -5,7 +5,7 @@
     • Results ribbon hosts count + sort control
     • Full content-width alignment across all zones
     • Improved focus, motion & responsive behaviour
-    • Search bar: larger hit area, black input text
+    • Search bar matches the filter-input design language
 
     FLUID SIZING CONTRACT
     ---------------------
@@ -79,14 +79,13 @@
     --pl-content-max:   73.75rem;   /* ≈ 1180 px */
     --pl-content-pad:   clamp(1rem, 3vw, 1.5rem);
 
-    /* ---- Inputs ----
-       Search bar is taller and its text is larger than the
-       generic filter inputs so the primary action reads as such.
-       Range bumped: 44 → 60 px tall, 14 → 16 px text. */
-    --pl-input-h:       clamp(2.75rem, 4vw, 3.75rem);      /* 44 → 60 px */
-    --pl-input-pad-x:   clamp(0.875rem, 1.4vw, 1.25rem);
-    --pl-input-fs:      var(--pl-fs-lg);                   /* 14 → 16 px */
-    --pl-input-icon:    clamp(1rem, 1.3vw, 1.25rem);       /* magnifier */
+    /* ---- Input tokens ----
+       Aligned with the extended-filter inputs so the search bar
+       and every filter field share one visual rhythm. */
+    --pl-input-h:       clamp(2.375rem, 3vw, 2.625rem);   /* 38 → 42 px */
+    --pl-input-pad-x:   clamp(0.75rem, 1.2vw, 1.125rem);
+    --pl-input-fs:      var(--pl-fs-sm);                  /* 12 → 14 px */
+    --pl-input-icon:    clamp(0.875rem, 1vw, 1rem);       /* magnifier */
 
     /* ---- Focus ring (em-based so it scales) ---- */
     --pl-focus-ring: 0 0 0 0.1875em rgba(15, 61, 46, 0.1);
@@ -167,43 +166,38 @@ body {
     align-items: stretch;
 }
 
-/* ---- Search bar (primary action) ----
-   Taller, wider, heavier shadow, thicker border, and a slightly
-   larger radius than the surrounding controls so it reads as the
-   page's primary input. */
+/* ---- Search bar ----
+   Matches the visual language of the extended-filter inputs:
+   same height, same 1px border, same small radius, same shadow
+   (none), same focus treatment. The bar is just an input wrapper
+   that also holds a leading magnifier icon. */
 .filters-container .search-bar {
     flex: 1 1 auto;
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: var(--pl-space-md);
+    gap: var(--pl-space-sm);
+
     background: var(--pl-surface);
-    border: 1.5px solid var(--pl-border-strong);
-    border-radius: var(--pl-radius-lg);
+    border: 1px solid var(--pl-border);
+    border-radius: var(--pl-radius-sm);
     padding-inline: var(--pl-input-pad-x);
     height: var(--pl-input-h);
     margin: 0;
-    box-shadow: var(--pl-shadow-md);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease,
-                background-color 0.2s ease;
-}
-
-.filters-container .search-bar:hover {
-    border-color: var(--pl-green-500);
-    box-shadow: 0 0.375em 1em rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filters-container .search-bar:focus-within {
     border-color: var(--pl-green-900);
-    box-shadow: var(--pl-focus-ring), var(--pl-shadow-md);
-    background: #FFFFFF;
+    box-shadow: var(--pl-focus-ring);
 }
 
-/* Magnifier icon — larger and darker to match the taller bar. */
+/* Magnifier icon — muted, scales with the surrounding text. */
 .filters-container .search-bar > i,
 .filters-container .search-bar > .fa-solid,
 .filters-container .search-bar > .fas {
-    color: var(--pl-green-900);
+    color: var(--pl-muted);
     font-size: var(--pl-input-icon);
     line-height: 1;
     flex-shrink: 0;
@@ -217,12 +211,12 @@ body {
 .filters-container .search-bar:focus-within > i,
 .filters-container .search-bar:focus-within > .fa-solid,
 .filters-container .search-bar:focus-within > .fas {
-    color: var(--pl-green-700);
+    color: var(--pl-green-900);
 }
 
 /* ---- The input itself ----
-   flex-native sizing so it fills the visible bar end-to-end;
-   black text on the white surface; no UA chrome. */
+   Sizing mirrors .filter-group input so the two read as one system.
+   Text is pure black on the white surface. */
 .filters-container .search-bar input {
     border: none;
     outline: none;
@@ -230,7 +224,7 @@ body {
     font-size: var(--pl-input-fs);
     font-weight: 500;
     line-height: 1.2;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
 
     /* Pure black for entered text — reads cleanly on the white bar. */
     color: var(--pl-input-text);
@@ -302,13 +296,13 @@ body {
     padding: 0;
     background: var(--pl-surface);
     border: 1px solid var(--pl-border);
-    border-radius: var(--pl-radius-md);
+    border-radius: var(--pl-radius-sm);
     color: var(--pl-text);
-    font-size: var(--pl-icon-lg);
+    font-size: var(--pl-icon-md);
     cursor: pointer;
     font-family: inherit;
     line-height: 1;
-    box-shadow: var(--pl-shadow-sm);
+    box-shadow: none;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -483,10 +477,11 @@ body {
     line-height: 1.2;
 }
 
+/* ---- Filter inputs (canonical input style on the page) ---- */
 .filters-container .filter-group input,
 .filters-container .filter-group select {
     width: 100%;
-    height: clamp(2.375rem, 3vw, 2.625rem);   /* 38 → 42 px */
+    height: var(--pl-input-h);
     padding-inline: var(--pl-input-pad-x);
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-sm);
@@ -649,7 +644,7 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
 
-    height: clamp(2.375rem, 3vw, 2.5rem);
+    height: var(--pl-input-h);
     min-width: clamp(11rem, 18vw, 11.875rem);
     padding-inline: var(--pl-input-pad-x) 2.75em;
 
