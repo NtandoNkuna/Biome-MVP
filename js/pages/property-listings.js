@@ -47,36 +47,55 @@
     // ============================================================
     // DOM CACHE
     // ============================================================
+    // IMPORTANT: this object must be populated AFTER the DOM is ready.
+    // Caching at module-evaluation time captures `null` whenever the
+    // script is parsed before the markup exists (e.g. loaded from <head>).
+    // That stale null was the cause of the search bar not responding:
+    // registerEventListeners() threw on `dom.searchInput.addEventListener`
+    // and init() aborted before any listener was attached.
+    //
     // Note: the property-type <select> has been removed from the markup.
-    // Property type is now chosen only through the category buttons, so
-    // there is no dom.propertyTypeFilter entry.
+    // Property type is now chosen only through the category buttons.
 
-    const dom = {
-        searchInput: document.getElementById('searchInput'),
-        filterToggleBtn: document.getElementById('filterToggleBtn'),
-        extendedFilters: document.getElementById('extendedFilters'),
-        closeFiltersBtn: document.getElementById('closeFiltersBtn'),
-        categoryButtons: document.getElementById('categoryButtons'),
-        minPrice: document.getElementById('minPrice'),
-        maxPrice: document.getElementById('maxPrice'),
-        bedroomsFilter: document.getElementById('bedroomsFilter'),
-        bathroomsFilter: document.getElementById('bathroomsFilter'),
-        provinceFilter: document.getElementById('provinceFilter'),
-        cityFilter: document.getElementById('cityFilter'),
-        suburbFilter: document.getElementById('suburbFilter'),
-        sortBy: document.getElementById('sortBy'),
-        applyFiltersBtn: document.getElementById('applyFiltersBtn'),
-        resetFiltersBtn: document.getElementById('resetFiltersBtn'),
-        listingsGrid: document.getElementById('listingsGrid'),
-        resultsCount: document.getElementById('resultsCount'),
-        loadingState: document.getElementById('loadingState'),
-        emptyState: document.getElementById('emptyState'),
-        errorState: document.getElementById('errorState'),
-        pagination: document.getElementById('pagination'),
-        prevPageBtn: document.getElementById('prevPageBtn'),
-        nextPageBtn: document.getElementById('nextPageBtn'),
-        pageInfo: document.getElementById('pageInfo'),
-    };
+    let dom = {};
+
+    function cacheDom() {
+        dom = {
+            searchInput:      document.getElementById('searchInput'),
+            filterToggleBtn:  document.getElementById('filterToggleBtn'),
+            extendedFilters:  document.getElementById('extendedFilters'),
+            closeFiltersBtn:  document.getElementById('closeFiltersBtn'),
+            categoryButtons:  document.getElementById('categoryButtons'),
+            minPrice:         document.getElementById('minPrice'),
+            maxPrice:         document.getElementById('maxPrice'),
+            bedroomsFilter:   document.getElementById('bedroomsFilter'),
+            bathroomsFilter:  document.getElementById('bathroomsFilter'),
+            provinceFilter:   document.getElementById('provinceFilter'),
+            cityFilter:       document.getElementById('cityFilter'),
+            suburbFilter:     document.getElementById('suburbFilter'),
+            sortBy:           document.getElementById('sortBy'),
+            applyFiltersBtn:  document.getElementById('applyFiltersBtn'),
+            resetFiltersBtn:  document.getElementById('resetFiltersBtn'),
+            listingsGrid:     document.getElementById('listingsGrid'),
+            resultsCount:     document.getElementById('resultsCount'),
+            loadingState:     document.getElementById('loadingState'),
+            emptyState:       document.getElementById('emptyState'),
+            errorState:       document.getElementById('errorState'),
+            pagination:       document.getElementById('pagination'),
+            prevPageBtn:      document.getElementById('prevPageBtn'),
+            nextPageBtn:      document.getElementById('nextPageBtn'),
+            pageInfo:         document.getElementById('pageInfo'),
+        };
+
+        // Surface missing nodes explicitly instead of failing silently later.
+        const missing = Object.entries(dom)
+            .filter(([, el]) => !el)
+            .map(([key]) => key);
+
+        if (missing.length) {
+            console.warn('[Listings] Missing DOM nodes:', missing.join(', '));
+        }
+    }
 
     // ============================================================
     // INITIALIZATION
@@ -84,6 +103,9 @@
 
     async function init() {
         try {
+            // Build the DOM cache first — everything below depends on it.
+            cacheDom();
+
             await initNavbar();
             await loadPropertyTypes();
             applyUrlParams();
@@ -426,6 +448,13 @@
     // ============================================================
 
     function registerEventListeners() {
+        // Guard: if the search input is missing, fail loudly instead of
+        // silently aborting the rest of the listener registration.
+        if (!dom.searchInput) {
+            console.error('[Listings] searchInput not found — search will not work.');
+            return;
+        }
+
         // Search input (debounced)
         dom.searchInput.addEventListener('input', window.Biome.Utils.debounce(() => {
             SearchState.searchText = dom.searchInput.value.trim();
