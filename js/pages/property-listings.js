@@ -45,83 +45,113 @@
     const DEBOUNCE_MS = 300;
 
     // ============================================================
-    // DOM CACHE
+    // DOM CACHE — populated after the DOM is ready
     // ============================================================
     // IMPORTANT: this object must be populated AFTER the DOM is ready.
     // Caching at module-evaluation time captures `null` whenever the
     // script is parsed before the markup exists (e.g. loaded from <head>).
-    // That stale null was the cause of the search bar not responding:
-    // registerEventListeners() threw on `dom.searchInput.addEventListener`
-    // and init() aborted before any listener was attached.
+    //
+    // The cache is also defensive:
+    //   • Detects duplicate IDs and prefers the visible node
+    //   • Clears stray `disabled` / `readonly` on the search input
+    //   • Walks ancestors to unset any `pointer-events: none`
     //
     // Note: the property-type <select> has been removed from the markup.
     // Property type is now chosen only through the category buttons.
 
     let dom = {};
 
-    function cacheDom() {
-        dom = {
-            searchInput:      document.getElementById('searchInput'),
-            filterToggleBtn:  document.getElementById('filterToggleBtn'),
-            extendedFilters:  document.getElementById('extendedFilters'),
-            closeFiltersBtn:  document.getElementById('closeFiltersBtn'),
-            categoryButtons:  document.getElementById('categoryButtons'),
-            minPrice:         document.getElementById('minPrice'),
-            maxPrice:         document.getElementById('maxPrice'),
-            bedroomsFilter:   document.getElementById('bedroomsFilter'),
-            bathroomsFilter:  document.getElementById('bathroomsFilter'),
-            provinceFilter:   document.getElementById('provinceFilter'),
-            cityFilter:       document.getElementById('cityFilter'),
-            suburbFilter:     document.getElementById('suburbFilter'),
-            sortBy:           document.getElementById('sortBy'),
-            applyFiltersBtn:  document.getElementById('applyFiltersBtn'),
-            resetFiltersBtn:  document.getElementById('resetFiltersBtn'),
-            listingsGrid:     document.getElementById('listingsGrid'),
-            resultsCount:     document.getElementById('resultsCount'),
-            loadingState:     document.getElementById('loadingState'),
-            emptyState:       document.getElementById('emptyState'),
-            errorState:       document.getElementById('errorState'),
-            pagination:       document.getElementById('pagination'),
-            prevPageBtn:      document.getElementById('prevPageBtn'),
-            nextPageBtn:      document.getElementById('nextPageBtn'),
-            pageInfo:         document.getElementById('pageInfo'),
-        };
+    const DOM_IDS = [
+        'searchInput', 'filterToggleBtn', 'extendedFilters', 'closeFiltersBtn',
+        'categoryButtons', 'minPrice', 'maxPrice', 'bedroomsFilter', 'bathroomsFilter',
+        'provinceFilter', 'cityFilter', 'suburbFilter', 'sortBy',
+        'applyFiltersBtn', 'resetFiltersBtn', 'listingsGrid', 'resultsCount',
+        'loadingState', 'emptyState', 'errorState', 'pagination',
+        'prevPageBtn', 'nextPageBtn', 'pageInfo',
+    ];
 
-        // Surface missing nodes explicitly instead of failing silently later.
-        const missing = Object.entries(dom)
-            .filter(([, el]) => !el)
-            .map(([key]) => key);
+    function cacheDom() {
+        dom = {};
+        const missing = [];
+
+        DOM_IDS.forEach(id => {
+            const matches = document.querySelectorAll(`#${id}`);
+
+            if (matches.length > 1) {
+                // Duplicate IDs are a common cause of "listener attached to the wrong element".
+                console.warn(`[Listings] Duplicate #${id} (${matches.length} found) — using the visible one.`);
+                dom[id] = Array.from(matches).find(el => {
+                    const r = el.getBoundingClientRect();
+                    return r.width > 0 && r.height > 0;
+                }) || matches[0];
+            } else if (matches.length === 1) {
+                dom[id] = matches[0];
+            } else {
+                dom[id] = null;
+                missing.push(id);
+            }
+        });
 
         if (missing.length) {
             console.warn('[Listings] Missing DOM nodes:', missing.join(', '));
+        }
+
+        // --- Defensive: make sure the search input is actually usable ---
+        if (dom.searchInput) {
+            if (dom.searchInput.disabled) {
+                console.warn('[Listings] searchInput was disabled — clearing.');
+                dom.searchInput.disabled = false;
+                dom.searchInput.removeAttribute('disabled');
+            }
+            if (dom.searchInput.readOnly) {
+                console.warn('[Listings] searchInput was readOnly — clearing.');
+                dom.searchInput.readOnly = false;
+                dom.searchInput.removeAttribute('readonly');
+            }
+
+            // If any ancestor has pointer-events: none, clicks never reach the input.
+            for (let el = dom.searchInput; el && el !== document.body; el = el.parentElement) {
+                if (getComputedStyle(el).pointerEvents === 'none') {
+                    console.warn('[Listings] Ancestor has pointer-events:none — re-enabling:', el);
+                    el.style.pointerEvents = 'auto';
+                }
+            }
         }
     }
 
     // ============================================================
     // INITIALIZATION
     // ============================================================
+    // Listeners are registered FIRST (critical path). Optional async
+    // work is isolated so a failure in one subsystem can't take the
+    // whole page — and the search bar in particular — down with it.
 
     async function init() {
-        try {
-            // Build the DOM cache first — everything below depends on it.
-            cacheDom();
+        // --- Critical path: must never be skipped -----------------
+        cacheDom();
+        registerEventListeners();
 
-            await initNavbar();
-            await loadPropertyTypes();
-            applyUrlParams();
-            registerEventListeners();
-            await fetchAndRenderListings();
+        // --- Enhancements: each isolated --------------------------
+        try { await initNavbar(); }
+        catch (e) { console.error('[Listings] Navbar init failed:', e); }
 
-            // On mobile, start with filters collapsed
-            if (window.innerWidth <= 768) {
-                collapseFilters();
-            }
+        try { await loadPropertyTypes(); }
+        catch (e) { console.error('[Listings] Property types failed:', e); }
 
-            console.log('[Listings] Ready.');
-        } catch (e) {
-            console.error('[Listings] Initialization error:', e);
-            window.Biome.UI.showToast('Failed to load page. Please refresh.', 'error');
+        try { applyUrlParams(); }
+        catch (e) { console.error('[Listings] URL params failed:', e); }
+
+        try { await fetchAndRenderListings(); }
+        catch (e) {
+            console.error('[Listings] Initial fetch failed:', e);
+            hideLoading();
+            showError();
         }
+
+        // On mobile, start with filters collapsed
+        if (window.innerWidth <= 768) collapseFilters();
+
+        console.log('[Listings] Ready.');
     }
 
     // ============================================================
@@ -447,77 +477,101 @@
     // EVENT LISTENERS
     // ============================================================
 
+    // Single debounced handler reused for the search input. Kept at
+    // module level so we never create duplicate closures.
+    const debouncedSearch = window.Biome.Utils.debounce(() => {
+        SearchState.searchText = dom.searchInput.value.trim();
+        SearchState.page = 1;
+        fetchAndRenderListings();
+    }, DEBOUNCE_MS);
+
     function registerEventListeners() {
-        // Guard: if the search input is missing, fail loudly instead of
-        // silently aborting the rest of the listener registration.
-        if (!dom.searchInput) {
+        // --- Search input -------------------------------------------------
+        if (dom.searchInput) {
+            dom.searchInput.addEventListener('input', debouncedSearch);
+
+            // Clicking anywhere inside .search-bar (icon, padding, gaps)
+            // focuses the input — protects against a collapsed hit area.
+            const searchBar = dom.searchInput.closest('.search-bar');
+            if (searchBar) {
+                searchBar.addEventListener('click', (e) => {
+                    if (e.target === dom.searchInput) return;                 // native focus
+                    if (e.target.closest('button, a, select, input, textarea, label')) return;
+                    e.preventDefault();
+                    dom.searchInput.focus();
+                });
+
+                const icon = searchBar.querySelector('i');
+                if (icon) {
+                    icon.style.cursor = 'text';
+                    icon.addEventListener('click', () => dom.searchInput.focus());
+                }
+            }
+        } else {
             console.error('[Listings] searchInput not found — search will not work.');
-            return;
         }
 
-        // Search input (debounced)
-        dom.searchInput.addEventListener('input', window.Biome.Utils.debounce(() => {
-            SearchState.searchText = dom.searchInput.value.trim();
-            SearchState.page = 1;
-            fetchAndRenderListings();
-        }, DEBOUNCE_MS));
+        // --- Filter toggle ------------------------------------------------
+        if (dom.filterToggleBtn) dom.filterToggleBtn.addEventListener('click', toggleFilters);
+        if (dom.closeFiltersBtn) dom.closeFiltersBtn.addEventListener('click', collapseFilters);
 
-        // Filter toggle
-        dom.filterToggleBtn.addEventListener('click', toggleFilters);
-        dom.closeFiltersBtn.addEventListener('click', collapseFilters);
+        // --- Category buttons (sole source of the property-type filter) ---
+        if (dom.categoryButtons) {
+            dom.categoryButtons.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
 
-        // Category buttons (sole source of the property-type filter)
-        dom.categoryButtons.addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (!btn) return;
+                document.querySelectorAll('.categories button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
 
-            document.querySelectorAll('.categories button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+                const typeId = btn.dataset.typeId || '';
+                SearchState.propertyTypeId = typeId || null;
+                SearchState.page = 1;
+                fetchAndRenderListings();
+            });
+        }
 
-            const typeId = btn.dataset.typeId || '';
-            SearchState.propertyTypeId = typeId || null;
-            SearchState.page = 1;
-            fetchAndRenderListings();
-        });
+        // --- Sort dropdown -----------------------------------------------
+        if (dom.sortBy) {
+            dom.sortBy.addEventListener('change', () => {
+                SearchState.sortBy = dom.sortBy.value;
+                SearchState.page = 1;
+                fetchAndRenderListings();
+            });
+        }
 
-        // Sort dropdown
-        dom.sortBy.addEventListener('change', () => {
-            SearchState.sortBy = dom.sortBy.value;
-            SearchState.page = 1;
-            fetchAndRenderListings();
-        });
-
-        dom.applyFiltersBtn.addEventListener('click', applyFilters);
-        dom.resetFiltersBtn.addEventListener('click', resetFilters);
+        // --- Apply / Reset -----------------------------------------------
+        if (dom.applyFiltersBtn) dom.applyFiltersBtn.addEventListener('click', applyFilters);
+        if (dom.resetFiltersBtn) dom.resetFiltersBtn.addEventListener('click', resetFilters);
 
         const emptyResetBtn = document.getElementById('emptyResetBtn');
-        if (emptyResetBtn) {
-            emptyResetBtn.addEventListener('click', resetFilters);
+        if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetFilters);
+
+        // --- Pagination ---------------------------------------------------
+        if (dom.prevPageBtn) {
+            dom.prevPageBtn.addEventListener('click', () => {
+                if (SearchState.page > 1) {
+                    SearchState.page--;
+                    fetchAndRenderListings();
+                }
+            });
         }
 
-        // Pagination
-        dom.prevPageBtn.addEventListener('click', () => {
-            if (SearchState.page > 1) {
-                SearchState.page--;
-                fetchAndRenderListings();
-            }
-        });
+        if (dom.nextPageBtn) {
+            dom.nextPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(SearchState.totalCount / SearchState.pageSize);
+                if (SearchState.page < totalPages) {
+                    SearchState.page++;
+                    fetchAndRenderListings();
+                }
+            });
+        }
 
-        dom.nextPageBtn.addEventListener('click', () => {
-            const totalPages = Math.ceil(SearchState.totalCount / SearchState.pageSize);
-            if (SearchState.page < totalPages) {
-                SearchState.page++;
-                fetchAndRenderListings();
-            }
-        });
-
-        // Close filters on outside click (mobile)
+        // --- Mobile: click outside collapses filters ---------------------
         document.addEventListener('click', (e) => {
             if (window.innerWidth > 768) return;
             const container = document.getElementById('filtersContainer');
-            if (container && !container.contains(e.target)) {
-                collapseFilters();
-            }
+            if (container && !container.contains(e.target)) collapseFilters();
         });
     }
 
