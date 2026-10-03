@@ -3,131 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Browse residential and commercial properties across South Africa.">
-    <title>Browse Properties — Biome</title>
+    <title>Property Listings | Biome</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Icons (Font Awesome) -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/property-listings.css">
+    <link rel="stylesheet" href="css/back-link.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <!-- Page styles -->
-    <link rel="stylesheet" href="property-listings.css">
-    <!-- back-link styling lives in back-link.css only -->
-    <!-- <link rel="stylesheet" href="back-link.css"> -->
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- ============================================================
+         BACK-LINK VIEWPORT ANCHOR — TRIPLE DEFENCE
+         1. Re-parent to <html>  (escapes transformed ancestors)
+         2. Popover / top-layer  (escapes the DOM tree entirely)
+         3. Manual scroll-track  (last-resort compensation)
+         ============================================================ -->
+    <script>
+    (function () {
+        'use strict';
+
+        var LINK_SELECTOR = '.back-link';
+
+        /* ---------- 1. Re-parent to <html> ---------- */
+        function relocate() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (link && link.parentElement !== document.documentElement) {
+                document.documentElement.appendChild(link);
+                console.log('[BackLink] Re-parented to <html>.');
+            }
+            return link;
+        }
+
+        /* ---------- 2. Top-layer via popover ---------- */
+        function tryTopLayer() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (!link) return false;
+            if (typeof link.showPopover !== 'function') return false;
+
+            if (!link.hasAttribute('popover')) {
+                link.setAttribute('popover', 'manual');
+            }
+            try {
+                link.showPopover();   // idempotent enough for our purpose
+                console.log('[BackLink] Promoted to top layer.');
+                return true;
+            } catch (e) {
+                console.warn('[BackLink] showPopover() failed:', e.message);
+                return false;
+            }
+        }
+
+        /* ---------- 3. Manual scroll compensation ----------
+           Only kicks in if the top layer isn't available AND
+           something above the link is still translating it.
+           We compensate by writing `top` on every scroll. */
+        function installScrollFallback() {
+            var link = document.querySelector(LINK_SELECTOR);
+            if (!link) return;
+
+            // Skip if the top layer took over — it doesn't need help.
+            if (link.hasAttribute('popover') && link.matches(':popover-open')) return;
+
+            var baseTop = 24;
+            var mq = window.matchMedia('(max-width: 768px)');
+            function updateBase() {
+                if (window.matchMedia('(max-width: 480px)').matches) baseTop = 12;
+                else if (mq.matches) baseTop = 16;
+                else baseTop = 24;
+            }
+
+            function sync() {
+                // If the link is inside a scroll-shifted body (classic
+                // smooth-scroll pattern), body's top is negative scrollY.
+                // We counter-shift the link so it visually stays put.
+                var bodyTop = parseFloat(getComputedStyle(document.body).top) || 0;
+                var htmlTop = parseFloat(getComputedStyle(document.documentElement).top) || 0;
+                var compensation = -(bodyTop + htmlTop);
+                link.style.setProperty('top', (baseTop + compensation) + 'px', 'important');
+            }
+
+            updateBase();
+            sync();
+
+            window.addEventListener('scroll', sync, { passive: true });
+            window.addEventListener('resize', function () { updateBase(); sync(); });
+            mq.addEventListener('change', function () { updateBase(); sync(); });
+            window.addEventListener('load', sync);
+
+            console.log('[BackLink] Scroll fallback installed.');
+        }
+
+        /* ---------- Boot sequence ---------- */
+        function boot() {
+            relocate();
+
+            var promoted = tryTopLayer();
+            if (!promoted) {
+                installScrollFallback();
+            }
+
+            // Retry re-parent a few times in case other scripts move it.
+            setTimeout(relocate, 300);
+            setTimeout(relocate, 1200);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+
+        window.addEventListener('load', boot);
+
+        // Watch for future DOM moves that would re-nest the link.
+        if (window.MutationObserver) {
+            document.addEventListener('DOMContentLoaded', function () {
+                var mo = new MutationObserver(function () {
+                    var link = document.querySelector(LINK_SELECTOR);
+                    if (link && link.parentElement !== document.documentElement) {
+                        document.documentElement.appendChild(link);
+                    }
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            });
+        }
+    })();
+    </script>
 </head>
 <body>
 
-    <!-- ============================================================
-         NAVBAR MOUNT
-         ============================================================ -->
-    <div id="navbarContainer"></div>
+    <!-- NAVBAR (hidden — kept in DOM so navbar.js does not crash) -->
+    <div id="navbarContainer" style="display: none;"></div>
 
+    <!-- PAGE HEADER -->
+    <section class="pl-page-header">
+        <h1>Find your next home</h1>
+        <p class="pl-page-subtitle">Browse verified listings across South Africa — updated daily.</p>
+    </section>
 
-    <!-- ============================================================
-         ZONE 1 — Page header
-         ============================================================ -->
-    <header class="pl-page-header">
-        <h1>Browse Properties</h1>
-        <p class="pl-page-subtitle">
-            Discover homes, apartments, and land across South Africa.
-            Refine by type, price, location, and more.
-        </p>
-    </header>
+    <!-- Back to previous page.
+         `popover="manual"` is a hint — the script will set it
+         automatically if it isn't there, and fall back to a
+         scroll-compensation strategy if the browser doesn't
+         support the popover API. -->
+    <a href="index.html" class="back-link" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </a>
 
-
-    <!-- ============================================================
-         ZONE 2 — Filters & search
-         ============================================================ -->
-    <div id="filtersContainer" class="filters-container">
-
-        <!-- Search row -->
+    <!-- FILTERS CONTAINER -->
+    <section class="filters-container" id="filtersContainer">
         <div class="top-row">
             <div class="search-bar">
-                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                <input
-                    id="searchInput"
-                    type="text"
-                    placeholder="Search by city, suburb, or keyword…"
-                    autocomplete="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    enterkeyhint="search"
-                    aria-label="Search properties">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" name="search"
+                       placeholder="Search spaces, cities, or suburbs..." autocomplete="off">
             </div>
-
             <div class="view-buttons">
-                <button
-                    id="filterToggleBtn"
-                    type="button"
-                    aria-expanded="true"
-                    aria-controls="extendedFilters"
-                    aria-label="Toggle filters">
-                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                <button id="filterToggleBtn" type="button" aria-label="Toggle filters" aria-expanded="true">
+                    <i class="fa-solid fa-sliders"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Category buttons — populated by JS from property_types -->
-        <div
-            class="categories"
-            id="categoryButtons"
-            role="group"
-            aria-label="Property type">
-            <!-- <button data-type-id="">All</button> injected by property-listings.js -->
-        </div>
+        <div class="categories" id="categoryButtons"></div>
 
-        <!-- Extended filter panel -->
+        <hr>
+
         <div id="extendedFilters" class="filter-panel">
             <div class="filter-box">
-
                 <div class="filter-header">
                     <h3>Filters</h3>
-                    <button
-                        id="closeFiltersBtn"
-                        type="button"
-                        aria-label="Close filters">
-                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    <button id="closeFiltersBtn" type="button" aria-label="Close filters">
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
-
-                <div class="filters-grid">
-
+                <div class="filters-grid" id="filtersGrid">
                     <div class="filter-group">
-                        <label for="minPrice">Min Price (R)</label>
-                        <input
-                            id="minPrice"
-                            type="number"
-                            min="0"
-                            step="1000"
-                            inputmode="numeric"
-                            placeholder="0">
+                        <label for="minPrice">Minimum Price (ZAR)</label>
+                        <input type="number" id="minPrice" name="minPrice" placeholder="0" min="0" step="1000">
                     </div>
-
                     <div class="filter-group">
-                        <label for="maxPrice">Max Price (R)</label>
-                        <input
-                            id="maxPrice"
-                            type="number"
-                            min="0"
-                            step="1000"
-                            inputmode="numeric"
-                            placeholder="Any">
+                        <label for="maxPrice">Maximum Price (ZAR)</label>
+                        <input type="number" id="maxPrice" name="maxPrice" placeholder="Any" min="0" step="1000">
                     </div>
-
                     <div class="filter-group">
                         <label for="bedroomsFilter">Bedrooms</label>
-                        <select id="bedroomsFilter">
+                        <select id="bedroomsFilter" name="bedrooms">
                             <option value="">Any</option>
                             <option value="1">1+</option>
                             <option value="2">2+</option>
@@ -136,10 +209,9 @@
                             <option value="5">5+</option>
                         </select>
                     </div>
-
                     <div class="filter-group">
                         <label for="bathroomsFilter">Bathrooms</label>
-                        <select id="bathroomsFilter">
+                        <select id="bathroomsFilter" name="bathrooms">
                             <option value="">Any</option>
                             <option value="1">1+</option>
                             <option value="2">2+</option>
@@ -147,159 +219,100 @@
                             <option value="4">4+</option>
                         </select>
                     </div>
-
                     <div class="filter-group">
                         <label for="provinceFilter">Province</label>
-                        <select id="provinceFilter">
-                            <option value="">Any</option>
-                            <option value="Gauteng">Gauteng</option>
-                            <option value="Western Cape">Western Cape</option>
-                            <option value="KwaZulu-Natal">KwaZulu-Natal</option>
-                            <option value="Eastern Cape">Eastern Cape</option>
-                            <option value="Free State">Free State</option>
-                            <option value="Limpopo">Limpopo</option>
-                            <option value="Mpumalanga">Mpumalanga</option>
-                            <option value="North West">North West</option>
-                            <option value="Northern Cape">Northern Cape</option>
-                        </select>
+                        <input type="text" id="provinceFilter" name="province" placeholder="e.g. Gauteng">
                     </div>
-
                     <div class="filter-group">
                         <label for="cityFilter">City</label>
-                        <input
-                            id="cityFilter"
-                            type="text"
-                            autocomplete="address-level2"
-                            placeholder="e.g. Cape Town">
+                        <input type="text" id="cityFilter" name="city" placeholder="e.g. Johannesburg">
                     </div>
-
                     <div class="filter-group">
                         <label for="suburbFilter">Suburb</label>
-                        <input
-                            id="suburbFilter"
-                            type="text"
-                            autocomplete="address-level3"
-                            placeholder="e.g. Sandton">
+                        <input type="text" id="suburbFilter" name="suburb" placeholder="e.g. Sandton">
                     </div>
-
                 </div>
-
                 <div class="filter-actions">
-                    <button
-                        id="applyFiltersBtn"
-                        type="button"
-                        class="btn btn-primary">
-                        <i class="fa-solid fa-check" aria-hidden="true"></i>
-                        Apply Filters
+                    <button id="applyFiltersBtn" class="btn btn-primary">
+                        <i class="fa-solid fa-filter"></i> Apply Filters
                     </button>
-                    <button
-                        id="resetFiltersBtn"
-                        type="button"
-                        class="btn btn-secondary">
-                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-                        Reset
+                    <button id="resetFiltersBtn" class="btn btn-secondary">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
                     </button>
                 </div>
-
             </div>
         </div>
+    </section>
 
-    </div><!-- /.filters-container -->
-
-
-    <!-- ============================================================
-         ZONE 3 — Results ribbon (count + sort)
-         ============================================================ -->
-    <div class="results-summary">
-        <p id="resultsCount" aria-live="polite">Loading properties…</p>
-
+    <!-- RESULTS SUMMARY -->
+    <section class="results-summary" id="resultsSummary">
+        <p id="resultsCount">Loading listings...</p>
         <div class="filter-group sort-group">
-            <label for="sortBy">Sort by</label>
-            <select id="sortBy">
-                <option value="newest">Newest first</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="bedrooms">Most bedrooms</option>
-                <option value="bathrooms">Most bathrooms</option>
+            <label for="sortBy">Sort By</label>
+            <select id="sortBy" name="sortBy">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
             </select>
         </div>
-    </div>
+    </section>
 
+    <!-- LISTINGS GRID -->
+    <section class="listings-section">
+        <div class="listings-grid" id="listingsGrid"></div>
 
-    <!-- ============================================================
-         ZONE 4 — Listings grid + states
-         ============================================================ -->
-    <section class="listings-section" aria-label="Property listings">
-
-        <!-- Loading -->
-        <div id="loadingState" class="loading-state" style="display: none;">
-            <div class="spinner" role="status" aria-label="Loading"></div>
-            <p>Finding properties…</p>
+        <div id="loadingState" class="loading-state" style="display:none;">
+            <div class="spinner"></div>
+            <p>Searching properties...</p>
         </div>
 
-        <!-- Empty -->
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <i class="fa-solid fa-house-circle-xmark empty-icon" aria-hidden="true"></i>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">🔍</div>
             <h3>No properties found</h3>
-            <p>Try adjusting your search or clearing some filters.</p>
-            <button
-                id="emptyResetBtn"
-                type="button"
-                class="btn empty-reset-btn">
-                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
-                Clear filters
+            <p>Try adjusting your filters or search another location.</p>
+            <button id="emptyResetBtn" class="btn btn-secondary empty-reset-btn">
+                <i class="fa-solid fa-rotate-left"></i> Reset Filters
             </button>
         </div>
 
-        <!-- Error -->
-        <div id="errorState" class="error-state" style="display: none;">
-            <i class="fa-solid fa-triangle-exclamation error-icon" aria-hidden="true"></i>
-            <h3>Something went wrong</h3>
-            <p>We couldn't load the listings. Please refresh and try again.</p>
+        <div id="errorState" class="error-state" style="display:none;">
+            <div class="error-icon">⚠️</div>
+            <h3>Unable to load listings</h3>
+            <p>Please try again later or refresh the page.</p>
+            <button class="btn btn-secondary" onclick="location.reload()">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Page
+            </button>
         </div>
-
-        <!-- Grid — cards injected by property-listings.js -->
-        <div id="listingsGrid" class="listings-grid"></div>
-
     </section>
 
-
-    <!-- ============================================================
-         ZONE 5 — Pagination
-         ============================================================ -->
-    <div id="pagination" class="pagination" style="display: none;">
-        <button id="prevPageBtn" type="button" class="btn btn-secondary">
-            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-            Previous
+    <!-- PAGINATION -->
+    <section class="pagination" id="pagination" style="display:none;">
+        <button id="prevPageBtn" class="btn btn-secondary" disabled>
+            <i class="fa-solid fa-chevron-left"></i> Previous
         </button>
-
-        <span id="pageInfo">Page 1 of 1</span>
-
-        <button id="nextPageBtn" type="button" class="btn btn-secondary">
-            Next
-            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPageBtn" class="btn btn-secondary">
+            Next <i class="fa-solid fa-chevron-right"></i>
         </button>
-    </div>
+    </section>
 
+    <!-- SCRIPTS -->
+    <script src="js/core/supabase.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/ui.js"></script>
+    <script src="js/core/auth.js"></script>
+    <script src="js/core/storage.js"></script>
 
-    <!-- ============================================================
-         FOOTER
-         ============================================================ -->
-    <footer class="footer">
-        <div class="logo-circle" aria-hidden="true">B</div>
-    </footer>
+    <script src="js/services/listingService.js"></script>
+    <script src="js/services/mediaService.js"></script>
+    <script src="js/services/profileService.js"></script>
+    <script src="js/services/propertyService.js"></script>
 
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/propertyCard.js"></script>
+    <script src="js/components/toast.js"></script>
 
-    <!-- ============================================================
-         SCRIPTS
-         Load order matters: core → services → components → page.
-         `defer` keeps parsing non-blocking while preserving order.
-         ============================================================ -->
-    <script src="biome-utils.js" defer></script>
-    <script src="biome-core.js" defer></script>
-    <script src="biome-services.js" defer></script>
-    <script src="biome-components.js" defer></script>
-    <script src="property-listings.js" defer></script>
-
+    <script src="js/pages/property-listings.js"></script>
 </body>
-</html>
+</html> 
