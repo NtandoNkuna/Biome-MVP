@@ -1,23 +1,8 @@
 /* =====================================================
-    BIOME — PROPERTY LISTINGS (Redesign v4)
-
-    Layout-aware refinement for the updated markup:
-    • Results ribbon hosts count + sort control
-    • Full content-width alignment across all zones
-    • Improved focus, motion & responsive behaviour
-    • Search bar matches the filter-input design language
-
-    FLUID SIZING CONTRACT
-    ---------------------
-    • Padding / gap  → clamp() bound to vw/vmin.
-    • Font-size      → clamp() between bounded ends.
-    • Widths/heights → % of parent, or clamp() + aspect-ratio.
-    • Radii          → em so they scale with local text.
-    • Icons          → em so they scale with surrounding text.
-    • Breakpoints    → in em to honour root font-size.
-
-    NOTE: back-link styling lives in back-link.css only.
-    ===================================================== */
+   BIOME — PROPERTY LISTINGS (Redesign v5)
+   Fluid sizing: clamp() for spacing/type, em for radii/icons,
+   em breakpoints. Back-link styling lives in back-link.css.
+   ===================================================== */
 
 :root {
     /* Palette */
@@ -32,65 +17,60 @@
     --pl-border:        #E3E6DF;
     --pl-border-strong: #D3D8CE;
 
-    --pl-text:          #182019;
-    --pl-muted:         #68746A;
+    --pl-text:  #182019;
+    --pl-muted: #68746A;
 
-    /* Pure black for text entered on the white search surface */
-    --pl-input-text:    #000000;
+    /* Pure black for anything typed on a white field */
+    --pl-input-text: #000000;
 
-    /* Shadows — em-based so blur scales with local font */
+    /* Shadows */
     --pl-shadow-sm: 0 0.0625em 0.125em rgba(0, 0, 0, 0.04);
-    --pl-shadow-md: 0 0.25em 0.75em   rgba(0, 0, 0, 0.06);
-    --pl-shadow-lg: 0 0.875em 1.75em  rgba(0, 0, 0, 0.08);
+    --pl-shadow-md: 0 0.25em 0.75em rgba(0, 0, 0, 0.06);
+    --pl-shadow-lg: 0 0.875em 1.75em rgba(0, 0, 0, 0.08);
 
-    /* Radii — em so they scale with the local font */
+    /* Radii */
     --pl-radius-sm: 0.5em;
     --pl-radius-md: 0.625em;
     --pl-radius-lg: 0.75em;
-    --pl-radius-full: 999em;
+    --pl-radius-full: 999px;
 
-    /* ---- Fluid spacing scale — 4 px floor → 60 px ceiling ---- */
+    /* Fluid spacing */
     --pl-space-2xs: clamp(0.25rem, 0.4vw, 0.5rem);
     --pl-space-xs:  clamp(0.375rem, 0.7vw, 0.75rem);
-    --pl-space-sm:  clamp(0.5rem,   1vw,   0.875rem);
-    --pl-space-md:  clamp(0.75rem,  1.5vw, 1.25rem);
-    --pl-space-lg:  clamp(1rem,     2.5vw, 2rem);
-    --pl-space-xl:  clamp(1.5rem,   4vw,   3.5rem);
-    --pl-space-2xl: clamp(2rem,     6vw,   3.75rem);
+    --pl-space-sm:  clamp(0.5rem, 1vw, 0.875rem);
+    --pl-space-md:  clamp(0.75rem, 1.5vw, 1.25rem);
+    --pl-space-lg:  clamp(1rem, 2.5vw, 2rem);
+    --pl-space-xl:  clamp(1.5rem, 4vw, 3.5rem);
+    --pl-space-2xl: clamp(2rem, 6vw, 3.75rem);
 
-    /* ---- Fluid type scale — 10 px floor → 30 px ceiling ---- */
-    --pl-fs-2xs: clamp(0.625rem,  0.7vw,  0.75rem);
-    --pl-fs-xs:  clamp(0.6875rem, 0.8vw,  0.8125rem);
-    --pl-fs-sm:  clamp(0.75rem,   0.9vw,  0.875rem);
-    --pl-fs-md:  clamp(0.8125rem, 1vw,    0.9375rem);
-    --pl-fs-lg:  clamp(0.875rem,  1.05vw, 1rem);
-    --pl-fs-xl:  clamp(1rem,      1.2vw,  1.125rem);
-    --pl-fs-2xl: clamp(1.125rem,  1.6vw,  1.5rem);
-    --pl-fs-3xl: clamp(1.25rem,   2.2vw,  1.75rem);
+    /* Fluid type */
+    --pl-fs-2xs: clamp(0.625rem, 0.7vw, 0.75rem);
+    --pl-fs-xs:  clamp(0.6875rem, 0.8vw, 0.8125rem);
+    --pl-fs-sm:  clamp(0.75rem, 0.9vw, 0.875rem);
+    --pl-fs-md:  clamp(0.8125rem, 1vw, 0.9375rem);
+    --pl-fs-lg:  clamp(0.875rem, 1.05vw, 1rem);
+    --pl-fs-xl:  clamp(1rem, 1.2vw, 1.125rem);
+    --pl-fs-2xl: clamp(1.125rem, 1.6vw, 1.5rem);
+    --pl-fs-3xl: clamp(1.25rem, 2.2vw, 1.75rem);
 
-    /* ---- Fluid icon sizes ---- */
-    --pl-icon-xs: clamp(0.625rem,  0.75vw, 0.75rem);
-    --pl-icon-sm: clamp(0.75rem,   0.9vw,  0.875rem);
-    --pl-icon-md: clamp(0.875rem,  1vw,    1rem);
-    --pl-icon-lg: clamp(1rem,      1.3vw,  1.25rem);
-    --pl-icon-xl: clamp(1.25rem,   2vw,    1.75rem);
+    /* Fluid icons */
+    --pl-icon-xs: clamp(0.625rem, 0.75vw, 0.75rem);
+    --pl-icon-sm: clamp(0.75rem, 0.9vw, 0.875rem);
+    --pl-icon-md: clamp(0.875rem, 1vw, 1rem);
+    --pl-icon-xl: clamp(1.25rem, 2vw, 1.75rem);
 
-    /* ---- Content width system ---- */
-    --pl-content-max:   73.75rem;   /* ≈ 1180 px */
-    --pl-content-pad:   clamp(1rem, 3vw, 1.5rem);
+    /* Content width */
+    --pl-content-max: 73.75rem;
+    --pl-content-pad: clamp(1rem, 3vw, 1.5rem);
 
-    /* ---- Input tokens ----
-       Aligned with the extended-filter inputs so the search bar
-       and every filter field share one visual rhythm. */
-    --pl-input-h:       clamp(2.375rem, 3vw, 2.625rem);   /* 38 → 42 px */
-    --pl-input-pad-x:   clamp(0.75rem, 1.2vw, 1.125rem);
-    --pl-input-fs:      var(--pl-fs-sm);                  /* 12 → 14 px */
-    --pl-input-icon:    clamp(0.875rem, 1vw, 1rem);       /* magnifier */
+    /* Input tokens (shared by search bar and filter fields) */
+    --pl-input-h:     clamp(2.375rem, 3vw, 2.625rem);
+    --pl-input-pad-x: clamp(0.75rem, 1.2vw, 1.125rem);
+    --pl-input-fs:    var(--pl-fs-sm);
+    --pl-input-icon:  clamp(0.875rem, 1vw, 1rem);
 
-    /* ---- Focus ring (em-based so it scales) ---- */
-    --pl-focus-ring: 0 0 0 0.1875em rgba(15, 61, 46, 0.1);
+    --pl-focus-ring: 0 0 0 0.1875em rgba(15, 61, 46, 0.12);
 
-    /* Chevron used by every <select> on the page */
     --pl-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2368746A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 }
 
@@ -102,19 +82,18 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Shared focus ring */
+/* Shared keyboard focus ring (inputs handle their own via the bar) */
 .filters-container :focus-visible,
 .results-summary :focus-visible,
 .listings-section :focus-visible,
 .pagination :focus-visible {
     outline: 0.125em solid var(--pl-green-500);
     outline-offset: 0.125em;
-    border-radius: var(--pl-radius-sm);
 }
 
 /* =========================================
-    ZONE 1 — Page header
-    ========================================= */
+   ZONE 1 — Page header
+   ========================================= */
 .pl-page-header {
     max-width: min(100%, var(--pl-content-max));
     margin-inline: auto;
@@ -124,7 +103,7 @@ body {
 .pl-page-header h1 {
     font-size: var(--pl-fs-3xl);
     font-weight: 700;
-    margin: 0 0 var(--pl-space-xs) 0;
+    margin: 0 0 var(--pl-space-xs);
     letter-spacing: -0.02em;
     line-height: 1.15;
     color: var(--pl-text);
@@ -136,12 +115,12 @@ body {
     line-height: 1.55;
     color: var(--pl-muted);
     margin: 0;
-    max-width: min(100%, 38.75rem);   /* ≈ 620 px */
+    max-width: min(100%, 38.75rem);
 }
 
 /* =========================================
-    ZONE 2 — Filters & search
-    ========================================= */
+   ZONE 2 — Filters & search
+   ========================================= */
 .filters-container {
     max-width: min(100%, var(--pl-content-max));
     margin-inline: auto;
@@ -154,30 +133,22 @@ body {
     display: block;
 }
 
-.filters-container > hr {
-    display: none !important;
-}
+.filters-container > hr { display: none !important; }
 
-/* ---- Search row ---- */
 .filters-container .top-row {
     display: flex;
     gap: var(--pl-space-sm);
-    margin: 0 0 var(--pl-space-md) 0;
+    margin: 0 0 var(--pl-space-md);
     align-items: stretch;
 }
 
-/* ---- Search bar ----
-   Matches the visual language of the extended-filter inputs:
-   same height, same 1px border, same small radius, same shadow
-   (none), same focus treatment. The bar is just an input wrapper
-   that also holds a leading magnifier icon. */
+/* ---- Search bar ---- */
 .filters-container .search-bar {
     flex: 1 1 auto;
     min-width: 0;
     display: flex;
     align-items: center;
     gap: var(--pl-space-sm);
-
     background: var(--pl-surface);
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-sm);
@@ -188,12 +159,13 @@ body {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.filters-container .search-bar:hover { border-color: var(--pl-border-strong); }
+
 .filters-container .search-bar:focus-within {
     border-color: var(--pl-green-900);
     box-shadow: var(--pl-focus-ring);
 }
 
-/* Magnifier icon — muted, scales with the surrounding text. */
 .filters-container .search-bar > i,
 .filters-container .search-bar > .fa-solid,
 .filters-container .search-bar > .fas {
@@ -204,7 +176,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;   /* clicks pass through to the bar handler */
+    pointer-events: none;
     transition: color 0.2s ease;
 }
 
@@ -214,70 +186,73 @@ body {
     color: var(--pl-green-900);
 }
 
-/* ---- The input itself ----
-   Sizing mirrors .filter-group input so the two read as one system.
-   Text is pure black on the white surface. */
-.filters-container .search-bar input {
+/* ---- Search input: text is ALWAYS black ----
+   Covers every state and uses -webkit-text-fill-color, which wins over
+   `color` in Chrome/Safari/Edge. !important guards against global
+   input styles in other stylesheets (e.g. a dark-theme or style.css rule). */
+.filters-container .search-bar input,
+.filters-container .search-bar input[type="text"],
+.filters-container .search-bar input[type="search"],
+.filters-container .search-bar input:hover,
+.filters-container .search-bar input:focus,
+.filters-container .search-bar input:active,
+.filters-container .search-bar input:focus-visible,
+.filters-container .search-bar input:disabled,
+.filters-container .search-bar input[readonly] {
+    color: var(--pl-input-text) !important;
+    -webkit-text-fill-color: var(--pl-input-text) !important;
+    caret-color: var(--pl-green-900);
+    opacity: 1;
+    background: transparent;
     border: none;
     outline: none;
+    box-shadow: none;
+
     font-family: inherit;
     font-size: var(--pl-input-fs);
     font-weight: 500;
     line-height: 1.2;
     letter-spacing: 0;
 
-    /* Pure black for entered text — reads cleanly on the white bar. */
-    color: var(--pl-input-text);
-    caret-color: var(--pl-green-900);
-
-    background: transparent;
-    box-shadow: none;
-    margin: 0;
-
-    /* Fill remaining horizontal space without fighting the icon */
     flex: 1 1 auto;
     min-width: 0;
     width: auto;
-
-    /* Fill the bar's height so clicks anywhere inside it land on the input. */
-    align-self: stretch;
     height: auto;
-
-    /* Vertical centring comes from the flex box, not from padding. */
+    align-self: stretch;
+    margin: 0;
     padding: 0;
     cursor: text;
-
-    /* Guard against any UA style that could freeze the field. */
     pointer-events: auto;
-
-    /* Kill any webkit autofill background / text overlay. */
     -webkit-appearance: none;
     appearance: none;
 }
 
 .filters-container .search-bar input::placeholder {
     color: var(--pl-muted);
+    -webkit-text-fill-color: var(--pl-muted);
     font-weight: 400;
     opacity: 1;
 }
 
-/* Autofill: Chrome/Safari tint the field yellow by default —
-   force it back to black-on-white. */
+.filters-container .search-bar input::selection {
+    background: var(--pl-green-100);
+    color: var(--pl-input-text);
+    -webkit-text-fill-color: var(--pl-input-text);
+}
+
+/* Remove the native clear "x" so it does not clash with the design */
+.filters-container .search-bar input[type="search"]::-webkit-search-decoration,
+.filters-container .search-bar input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+/* Autofill: keep black on white */
 .filters-container .search-bar input:-webkit-autofill,
 .filters-container .search-bar input:-webkit-autofill:hover,
 .filters-container .search-bar input:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--pl-input-text);
+    -webkit-text-fill-color: var(--pl-input-text) !important;
     -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset;
     transition: background-color 5000s ease-in-out 0s;
-}
-
-/* Defensive override in case another stylesheet freezes the field. */
-.filters-container .search-bar input:disabled,
-.filters-container .search-bar input[readonly] {
-    opacity: 1;
-    cursor: text;
-    color: var(--pl-input-text);
-    background: transparent;
 }
 
 /* ---- View buttons ---- */
@@ -299,9 +274,9 @@ body {
     border-radius: var(--pl-radius-sm);
     color: var(--pl-text);
     font-size: var(--pl-icon-md);
-    cursor: pointer;
     font-family: inherit;
     line-height: 1;
+    cursor: pointer;
     box-shadow: none;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
@@ -323,13 +298,12 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: var(--pl-space-xs);
-    margin: 0 0 var(--pl-space-md) 0;
+    margin: 0 0 var(--pl-space-md);
     padding: 0;
 }
 
 .filters-container .categories button,
-.filters-container .categories .category-btn,
-.filters-container .categories > button {
+.filters-container .categories .category-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
@@ -338,15 +312,14 @@ body {
     font-size: var(--pl-fs-sm);
     font-weight: 500;
     line-height: 1.2;
+    font-family: inherit;
+    white-space: nowrap;
     border: 1px solid var(--pl-border);
     background: var(--pl-surface);
     color: var(--pl-muted);
     cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
     box-shadow: var(--pl-shadow-sm);
-    transition: background 0.2s ease, color 0.2s ease,
-                border-color 0.2s ease, transform 0.15s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .filters-container .categories button:hover,
@@ -368,10 +341,7 @@ body {
 /* ---- Extended filter panel (in-flow) ---- */
 .filters-container .filter-panel {
     position: static !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
+    inset: auto !important;
     width: auto !important;
     height: auto !important;
     max-width: 100% !important;
@@ -397,9 +367,7 @@ body {
 
 .filters-container .filter-panel[hidden],
 .filters-container .filter-panel.is-hidden,
-.filters-container .filter-panel.collapsed {
-    display: none !important;
-}
+.filters-container .filter-panel.collapsed { display: none !important; }
 
 .filters-container .filter-box {
     background: transparent;
@@ -418,8 +386,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 0 var(--pl-space-md) 0;
-    padding: 0 0 var(--pl-space-md) 0;
+    margin: 0 0 var(--pl-space-md);
+    padding: 0 0 var(--pl-space-md);
     border-bottom: 1px solid var(--pl-border);
 }
 
@@ -477,7 +445,7 @@ body {
     line-height: 1.2;
 }
 
-/* ---- Filter inputs (canonical input style on the page) ---- */
+/* ---- Filter inputs: black text, same look as the search bar ---- */
 .filters-container .filter-group input,
 .filters-container .filter-group select {
     width: 100%;
@@ -487,14 +455,15 @@ body {
     border-radius: var(--pl-radius-sm);
     font-family: inherit;
     font-size: var(--pl-fs-sm);
-    color: var(--pl-text);
-    background: var(--pl-surface);
+    font-weight: 500;
+    color: var(--pl-input-text);
+    -webkit-text-fill-color: var(--pl-input-text);
+    background-color: var(--pl-surface);
     outline: none;
     box-shadow: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Custom select styling (filters) */
 .filters-container .filter-group select {
     appearance: none;
     -webkit-appearance: none;
@@ -507,6 +476,9 @@ body {
     cursor: pointer;
 }
 
+.filters-container .filter-group input:hover,
+.filters-container .filter-group select:hover { border-color: var(--pl-border-strong); }
+
 .filters-container .filter-group input:focus,
 .filters-container .filter-group select:focus {
     border-color: var(--pl-green-900);
@@ -515,9 +487,11 @@ body {
 
 .filters-container .filter-group input::placeholder {
     color: var(--pl-muted);
+    -webkit-text-fill-color: var(--pl-muted);
+    font-weight: 400;
+    opacity: 1;
 }
 
-/* Hide number input spinners for a cleaner look */
 .filters-container .filter-group input[type="number"]::-webkit-outer-spin-button,
 .filters-container .filter-group input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -531,14 +505,12 @@ body {
 .filters-container .filter-actions {
     display: flex;
     gap: var(--pl-space-sm);
-    margin: var(--pl-space-md) 0 0 0;
-    padding: var(--pl-space-md) 0 0 0;
+    margin: var(--pl-space-md) 0 0;
+    padding: var(--pl-space-md) 0 0;
     border-top: 1px solid var(--pl-border);
 }
 
-.filters-container .filter-actions .btn,
-.filters-container .filter-actions .btn.btn-primary,
-.filters-container .filter-actions .btn.btn-secondary {
+.filters-container .filter-actions .btn {
     padding: 0.7em 1.4em;
     height: auto;
     border-radius: var(--pl-radius-sm);
@@ -552,10 +524,8 @@ body {
     font-family: inherit;
     text-decoration: none;
     box-shadow: none;
-    transform: none;
-    transition: background 0.2s ease, color 0.2s ease,
-                border-color 0.2s ease, transform 0.2s ease,
-                box-shadow 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+                transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filters-container .filter-actions .btn-primary {
@@ -583,27 +553,24 @@ body {
 }
 
 /* =========================================
-    ZONE 3 — Results ribbon
-    ========================================= */
+   ZONE 3 — Results ribbon
+   ========================================= */
 .results-summary {
     background: var(--pl-surface);
     border-top: 1px solid var(--pl-border);
     border-bottom: 1px solid var(--pl-border);
     margin: 0;
-
-    /* Fluid padding-inline aligned to page column. */
     padding-block: var(--pl-space-sm);
     padding-inline: max(
         var(--pl-content-pad),
         calc((100% - var(--pl-content-max)) / 2 + var(--pl-content-pad))
     );
-
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--pl-space-sm) var(--pl-space-md);
-    min-height: 3.875rem;   /* ≈ 62 px, scales with root */
+    min-height: 3.875rem;
 }
 
 .results-summary p {
@@ -617,7 +584,6 @@ body {
     font-weight: 500;
 }
 
-/* --- Sort control --- */
 .results-summary .sort-group,
 .results-summary .filter-group.sort-group {
     display: flex;
@@ -643,11 +609,9 @@ body {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-
     height: var(--pl-input-h);
-    min-width: clamp(11rem, 18vw, 11.875rem);
+    min-width: clamp(10rem, 18vw, 12rem);
     padding-inline: var(--pl-input-pad-x) 2.75em;
-
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-sm);
     background-color: var(--pl-surface);
@@ -655,11 +619,11 @@ body {
     background-repeat: no-repeat;
     background-position: right 0.9em center;
     background-size: 0.9em;
-
     font-family: inherit;
     font-size: var(--pl-fs-sm);
     font-weight: 500;
-    color: var(--pl-text);
+    color: var(--pl-input-text);
+    -webkit-text-fill-color: var(--pl-input-text);
     cursor: pointer;
     outline: none;
     box-shadow: none;
@@ -677,8 +641,8 @@ body {
 }
 
 /* =========================================
-    ZONE 4 — Listings grid
-    ========================================= */
+   ZONE 4 — Listings grid
+   ========================================= */
 .listings-section {
     max-width: min(100%, var(--pl-content-max));
     margin-inline: auto;
@@ -692,9 +656,7 @@ body {
     margin: 0;
 }
 
-.listings-grid:empty {
-    display: none;
-}
+.listings-grid:empty { display: none; }
 
 .listings-grid .property-card {
     background: var(--pl-surface);
@@ -723,7 +685,6 @@ body {
     border-color: var(--pl-green-500);
 }
 
-/* Image height is aspect-ratio driven, not a fixed pixel. */
 .listings-grid .property-image {
     position: relative;
     aspect-ratio: 16 / 10;
@@ -740,9 +701,7 @@ body {
     transition: transform 0.4s ease;
 }
 
-.listings-grid .property-card:hover .property-image img {
-    transform: scale(1.04);
-}
+.listings-grid .property-card:hover .property-image img { transform: scale(1.04); }
 
 .listings-grid .property-type-badge {
     position: absolute;
@@ -774,7 +733,7 @@ body {
     font-weight: 700;
     letter-spacing: -0.005em;
     line-height: 1.3;
-    margin: 0 0 var(--pl-space-xs) 0;
+    margin: 0 0 var(--pl-space-xs);
     color: var(--pl-text);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -788,7 +747,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.35em;
-    margin: 0 0 var(--pl-space-md) 0;
+    margin: 0 0 var(--pl-space-md);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -800,8 +759,6 @@ body {
     color: var(--pl-green-500);
 }
 
-/* Mini divider above the price anchors the
-   price as a distinct "footer" in each card. */
 .listings-grid .price-row {
     margin-block-start: auto;
     padding-block-start: var(--pl-space-sm);
@@ -831,7 +788,7 @@ body {
 .listings-grid .property-tags {
     display: flex;
     gap: var(--pl-space-sm);
-    margin: var(--pl-space-sm) 0 0 0;
+    margin: var(--pl-space-sm) 0 0;
     flex-wrap: wrap;
     align-items: center;
 }
@@ -842,7 +799,6 @@ body {
     gap: 0.35em;
     background: transparent;
     padding: 0;
-    border-radius: 0;
     font-size: var(--pl-fs-xs);
     line-height: 1.3;
     color: var(--pl-muted);
@@ -854,8 +810,8 @@ body {
 }
 
 /* =========================================
-    Loading / Empty / Error states
-    ========================================= */
+   Loading / Empty / Error states
+   ========================================= */
 .loading-state,
 .empty-state,
 .error-state {
@@ -864,14 +820,13 @@ body {
     background: var(--pl-surface);
     border: 1px solid var(--pl-border);
     border-radius: var(--pl-radius-lg);
-    max-width: min(100%, 42.5rem);   /* ≈ 680 px */
+    max-width: min(100%, 42.5rem);
     margin-inline: auto;
     box-shadow: var(--pl-shadow-sm);
 }
 
-.loading-state .spinner,
 .spinner {
-    width:  clamp(2.5rem, 4vw, 2.75rem);
+    width: clamp(2.5rem, 4vw, 2.75rem);
     height: auto;
     aspect-ratio: 1 / 1;
     border: 0.1875em solid var(--pl-border);
@@ -882,9 +837,7 @@ body {
     font-size: var(--pl-fs-md);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-state p,
 .empty-state p,
@@ -908,7 +861,7 @@ body {
     font-size: var(--pl-fs-2xl);
     font-weight: 700;
     line-height: 1.3;
-    margin: 0 0 var(--pl-space-xs) 0;
+    margin: 0 0 var(--pl-space-xs);
     color: var(--pl-text);
     text-wrap: balance;
 }
@@ -944,8 +897,8 @@ body {
 }
 
 /* =========================================
-    ZONE 5 — Pagination
-    ========================================= */
+   ZONE 5 — Pagination
+   ========================================= */
 .pagination {
     max-width: min(100%, var(--pl-content-max));
     margin-inline: auto;
@@ -959,8 +912,7 @@ body {
     color: var(--pl-muted);
 }
 
-.pagination .btn,
-.pagination .btn.btn-secondary {
+.pagination .btn {
     border: 1px solid var(--pl-border);
     background: var(--pl-surface);
     padding: 0.5625em 1.125em;
@@ -976,8 +928,7 @@ body {
     gap: 0.5em;
     text-decoration: none;
     box-shadow: var(--pl-shadow-sm);
-    transition: background 0.2s ease, border-color 0.2s ease,
-                color 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .pagination .btn:hover:not(:disabled) {
@@ -1003,117 +954,43 @@ body {
     white-space: nowrap;
 }
 
-/* =========================================
-    Footer polish
-    ========================================= */
+/* Footer polish */
 .footer .logo-circle {
     background: var(--pl-green-500);
     color: #fff;
 }
 
 /* =====================================================
-   RESPONSIVE
-   -----------------------------------------------------
-   Only structural changes here. Fluid tokens above handle
-   every in-between width continuously. Breakpoints are in
-   em so they respect the user's root font-size setting.
+   RESPONSIVE (em breakpoints)
    ===================================================== */
-
-/* ---- Large tablets / small laptops ---- */
-@media (max-width: 64em) {          /* ≈ 1024 px */
-    .listings-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .filters-container .filters-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+@media (max-width: 64em) {
+    .listings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .filters-container .filters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---- Tablets portrait ---- */
-@media (max-width: 48em) {          /* ≈ 768 px */
-    /* Results ribbon — stack count above the sort control */
-    .results-summary {
-        justify-content: flex-start;
-        gap: var(--pl-space-sm);
-    }
+@media (max-width: 48em) {
+    .results-summary { justify-content: flex-start; gap: var(--pl-space-sm); }
+    .results-summary p { flex: 1 1 100%; }
+    .results-summary .sort-group { width: 100%; justify-content: space-between; }
+    .results-summary .sort-group select { flex: 1 1 auto; min-width: 0; max-width: min(100%, 16.25rem); }
 
-    .results-summary p {
-        flex: 1 1 100%;
-    }
+    .filters-container .top-row { flex-wrap: wrap; }
+    .filters-container .search-bar { flex: 1 1 100%; width: 100%; }
+    .filters-container .view-buttons { flex: 1 1 100%; width: 100%; }
+    .filters-container .view-buttons button { flex: 1; width: auto; }
 
-    .results-summary .sort-group {
-        width: 100%;
-        justify-content: space-between;
-    }
+    .listings-grid { grid-template-columns: 1fr; gap: var(--pl-space-lg); }
 
-    .results-summary .sort-group select {
-        flex: 1 1 auto;
-        min-width: 0;
-        max-width: min(100%, 16.25rem);
-    }
+    .filters-container .filter-actions { flex-direction: column; }
+    .filters-container .filter-actions .btn { justify-content: center; width: 100%; }
 
-    .filters-container .top-row {
-        flex-wrap: wrap;
-    }
-
-    .filters-container .search-bar {
-        flex: 1 1 100%;
-        width: 100%;
-    }
-
-    .filters-container .view-buttons {
-        flex: 1 1 100%;
-        width: 100%;
-    }
-
-    .filters-container .view-buttons button {
-        flex: 1;
-        width: auto;
-        height: var(--pl-input-h);
-    }
-
-    .listings-grid {
-        grid-template-columns: 1fr;
-        gap: var(--pl-space-lg);
-    }
-
-    .filters-container .filters-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .filters-container .filter-actions {
-        flex-direction: column;
-    }
-
-    .filters-container .filter-actions .btn,
-    .filters-container .filter-actions .btn.btn-primary,
-    .filters-container .filter-actions .btn.btn-secondary {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .pagination {
-        flex-wrap: wrap;
-        gap: var(--pl-space-sm);
-    }
+    .pagination { flex-wrap: wrap; gap: var(--pl-space-sm); }
 }
 
-/* ---- Phones ---- */
-@media (max-width: 30em) {          /* ≈ 480 px */
-    .results-summary .sort-group select {
-        max-width: none;
-    }
-
-    .filters-container .filters-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Slightly reduce the image aspect on very narrow
-       screens so the card doesn't dominate the fold. */
-    .listings-grid .property-image {
-        aspect-ratio: 4 / 3;
-    }
+@media (max-width: 30em) {
+    .results-summary .sort-group select { max-width: none; }
+    .filters-container .filters-grid { grid-template-columns: 1fr; }
+    .listings-grid .property-image { aspect-ratio: 4 / 3; }
 }
 
 /* =====================================================
@@ -1121,11 +998,7 @@ body {
    ===================================================== */
 @media (prefers-reduced-motion: reduce) {
     .filters-container .filter-panel,
-    .listings-grid .property-card,
-    .loading-state .spinner,
-    .spinner {
-        animation: none !important;
-    }
+    .listings-grid .property-card { animation: none !important; }
 
     .listings-grid .property-card,
     .listings-grid .property-card:hover,
@@ -1137,8 +1010,6 @@ body {
         transition: none !important;
     }
 
-    /* Freeze the spinner rather than hiding it. */
-    .spinner {
-        animation-duration: 3s !important;
-    }
+    /* Slow the spinner rather than removing the loading cue */
+    .spinner { animation-duration: 3s; }
 }
