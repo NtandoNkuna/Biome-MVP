@@ -66,7 +66,6 @@
                 email:     document.getElementById('email'),
                 phone:     document.getElementById('phone'),
                 account:   document.getElementById('account-type'),
-                country:   document.getElementById('country'),
                 password:  document.getElementById('password'),
                 confirm:   document.getElementById('confirm-password')
             };
@@ -77,7 +76,6 @@
                 email:     fields.email?.value.trim()     || '',
                 phone:     fields.phone?.value.trim()     || '',
                 account:   fields.account?.value          || '',
-                country:   fields.country?.value.trim()   || '',
                 password:  fields.password?.value         || '',
                 confirm:   fields.confirm?.value          || ''
             };
@@ -115,12 +113,6 @@
 
             // Metadata → auth.users.user_metadata. The profiles row is
             // created by a DB trigger on auth.users insert.
-            //
-            // Note: `country` is intentionally NOT sent. There is no
-            // corresponding column on `profiles`, and no service in the
-            // codebase reads or writes it. Sending it as metadata was
-            // dead weight that risked triggering validation errors in
-            // the profiles-creation trigger.
             const metadata = {
                 first_name:   values.firstName,
                 last_name:    values.surname,
