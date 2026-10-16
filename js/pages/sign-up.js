@@ -87,6 +87,17 @@
             if (!values.email) {
                 setStatus('Please enter your email address.', 'error'); return;
             }
+            // Format check — Supabase returns a generic 400 ("Unable
+            // to validate email address: invalid format") for anything
+            // its stricter validator dislikes. Catch it here so the
+            // user gets an actionable message instead of a raw error.
+            if (!isValidEmail(values.email)) {
+                setStatus(
+                    'Please enter a valid email address (e.g. you@example.com).',
+                    'error'
+                );
+                return;
+            }
             if (!values.phone) {
                 setStatus('Please enter your phone number.', 'error'); return;
             }
@@ -152,6 +163,9 @@
                     setStatus('An account with this email already exists.', 'error');
                 } else if (lower.includes('password')) {
                     setStatus('Password does not meet the requirements.', 'error');
+                } else if (lower.includes('email')) {
+                    // Any residual email-related error from Supabase.
+                    setStatus('Please enter a valid email address.', 'error');
                 } else {
                     setStatus(msg, 'error');
                 }
@@ -251,6 +265,24 @@
         if (icons[0]) icons[0].classList.toggle('valid', reqs.length);
         if (icons[1]) icons[1].classList.toggle('valid', reqs.numOrSym);
         if (icons[2]) icons[2].classList.toggle('valid', reqs.mixedCase);
+    }
+
+    // ---------------------------------------------------------
+    // Email validation
+    // ---------------------------------------------------------
+
+    // Requires: local-part@domain.tld — a dot, and a 2+ letter TLD.
+    // Stricter than the browser's built-in check and close to what
+    // Supabase's server-side validator accepts. The ASCII-only guard
+    // rejects zero-width spaces, smart quotes, NBSP, etc., which
+    // `String.prototype.trim()` does NOT strip and which Supabase
+    // rejects with "invalid format".
+    const EMAIL_PATTERN = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+    function isValidEmail(value) {
+        if (!value) return false;
+        if (!/^[\x20-\x7E]+$/.test(value)) return false; // ASCII printable only
+        return EMAIL_PATTERN.test(value);
     }
 
     // ---------------------------------------------------------
