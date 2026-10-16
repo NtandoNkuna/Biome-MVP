@@ -93,8 +93,21 @@
          *                              auth.users insert.
          */
         signup: async function(email, password, metadata = {}) {
+            // Normalize. Supabase rejects malformed addresses with an
+            // opaque 400, so strip anything trim() leaves behind
+            // (zero-width chars, NBSP) and fail fast if still invalid.
+            const cleanEmail = String(email || '')
+                .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '') // strip ZWSP/ZWNJ/ZWJ/BOM/NBSP
+                .trim()
+                .toLowerCase();
+
+            const EMAIL_PATTERN = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            if (!EMAIL_PATTERN.test(cleanEmail)) {
+                throw new Error('Please enter a valid email address (e.g. you@example.com).');
+            }
+
             const { data, error } = await supabase.auth.signUp({
-                email: email.trim().toLowerCase(),
+                email: cleanEmail,
                 password: password,
                 options: { data: metadata }
             });
@@ -239,4 +252,4 @@
     window.Biome.Auth = Auth;
 
     console.log('[Auth] Initialized successfully.');
-})();   
+})();
